@@ -1,0 +1,14 @@
+{
+  "images" : [
+    {
+      "filename" : "Clarify App Icon-iOS-Default-1024x1024@1x 9.png",
+      "idiom" : "universal",
+      "platform" : "ios",
+      "size" : "1024x1024"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
