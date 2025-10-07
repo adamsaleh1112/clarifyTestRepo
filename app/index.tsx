@@ -1,21 +1,27 @@
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BlurView } from 'expo-blur';
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
+import * as DocumentPicker from 'expo-document-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Animated, Dimensions, Image, Modal, Platform, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
+import { getTheme } from '@/utils/theme';
 
 interface Article {
   id: string;
   title: string;
-  url: string;
   content: string;
   date: string;
   imageUrl?: string;
   inlineImages?: string[];
+  bookmarked?: boolean;
   deleteAnimation?: any;
+  url?: string;
 }
 
 interface ContentBlock {
@@ -29,6 +35,7 @@ const { width } = Dimensions.get('window');
 const cardWidth = (width - 48) / 2;
 
 export default function HomeScreen() {
+  const router = useRouter();
   const [articles, setArticles] = useState<Article[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
@@ -38,22 +45,54 @@ export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [deletingArticles, setDeletingArticles] = useState<Set<string>>(new Set());
-  const rotateAnim = new Animated.Value(0);
-  const scaleAnim = new Animated.Value(1);
-  const deleteButtonsScale = new Animated.Value(0);
+  const [isPenExpanded, setIsPenExpanded] = useState(false);
+  const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+  const rotateAnim = React.useRef(new Animated.Value(0)).current;
+  const scaleAnim = React.useRef(new Animated.Value(1)).current;
+  const deleteButtonsScale = React.useRef(new Animated.Value(0)).current;
+  const modalOpacity = React.useRef(new Animated.Value(0)).current;
+  const contentOpacity = React.useRef(new Animated.Value(0)).current;
+  const leftButtonScale = React.useRef(new Animated.Value(1)).current;
+  const rightButtonScale = React.useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     loadArticles();
+    loadSettings();
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // Reload settings whenever the screen is focused (e.g., after returning from Settings)
+      loadSettings();
+      return () => {};
+    }, [])
+  );
 
   const onRefresh = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     await loadArticles(true);
   };
 
-  const filteredArticles = articles.filter(article =>
-    article.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const loadSettings = async () => {
+    try {
+      const stored = await AsyncStorage.getItem('settings');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (typeof parsed.darkMode === 'boolean') {
+          setDarkMode(parsed.darkMode);
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  };
+
+  const filteredArticles = articles.filter(article => {
+    const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesBookmarkFilter = showBookmarkedOnly ? article.bookmarked : true;
+    return matchesSearch && matchesBookmarkFilter;
+  });
 
   const toggleSearch = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -61,6 +100,11 @@ export default function HomeScreen() {
     if (showSearch) {
       setSearchQuery('');
     }
+  };
+
+  const handleOpenSettings = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push('/settings');
   };
 
   const loadArticles = async (showRefreshFeedback = false) => {
@@ -649,6 +693,28 @@ The league will literally look quite different in 2025 as eight teams – the Bi
     }
   };
 
+  const toggleBookmark = async (articleId: string) => {
+    try {
+      const updatedArticles = articles.map(article => 
+        article.id === articleId 
+          ? { ...article, bookmarked: !article.bookmarked }
+          : article
+      );
+      
+      setArticles(updatedArticles);
+      await AsyncStorage.setItem('articles', JSON.stringify(updatedArticles));
+      
+      // Update selected article if it's the one being bookmarked
+      if (selectedArticle && selectedArticle.id === articleId) {
+        setSelectedArticle({ ...selectedArticle, bookmarked: !selectedArticle.bookmarked });
+      }
+      
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+    }
+  };
+
   const exitDeleteMode = () => {
     // Animate delete buttons disappearing
     Animated.spring(deleteButtonsScale, {
@@ -741,6 +807,7 @@ The league will literally look quite different in 2025 as eight teams – the Bi
         style={[
           styles.articleCard,
           {
+            backgroundColor: colors.surface,
             transform: [
               { scale: Animated.multiply(cardScale, deleteScale) },
             ],
@@ -761,39 +828,41 @@ The league will literally look quite different in 2025 as eight teams – the Bi
             <Image source={{ uri: article.imageUrl }} style={styles.articleImage} />
           )}
           <View style={styles.articleInfo}>
-            <Text style={styles.articleTitle} numberOfLines={3}>
+            <Text style={[styles.articleTitle, { color: colors.text }]} numberOfLines={3}>
               {article.title}
             </Text>
-            <Text style={styles.articleDate}>{article.date}</Text>
+            <Text style={[styles.articleDate, { color: colors.textMuted }]}>{article.date}</Text>
           </View>
         </TouchableOpacity>
-        {deleteMode && (
-          <Animated.View
-            style={[
-              styles.deleteButton,
-              {
-                transform: [
-                  { scale: deleteButtonsScale },
-                  {
-                    rotate: deleteButtonsScale.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: ['180deg', '0deg'],
-                    }),
-                  },
-                ],
-              },
-            ]}
+        {/* Always render delete button but make it invisible when not in delete mode */}
+        <Animated.View
+          style={[
+            styles.deleteButton,
+            {
+              backgroundColor: colors.surface2,
+              opacity: deleteMode ? 1 : 0,
+              transform: [
+                { scale: deleteButtonsScale },
+                {
+                  rotate: deleteButtonsScale.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['180deg', '0deg'],
+                  }),
+                },
+              ],
+            },
+          ]}
+          pointerEvents={deleteMode ? 'auto' : 'none'}
+        >
+          <TouchableOpacity
+            style={styles.deleteButtonTouchable}
+            onPress={handleDelete}
+            activeOpacity={0.7}
+            disabled={isDeleting}
           >
-            <TouchableOpacity
-              style={styles.deleteButtonTouchable}
-              onPress={handleDelete}
-              activeOpacity={0.7}
-              disabled={isDeleting}
-            >
-              <Ionicons name="close" size={16} color="#000000" />
-            </TouchableOpacity>
-          </Animated.View>
-        )}
+            <Ionicons name="close" size={16} color={colors.icon} />
+          </TouchableOpacity>
+        </Animated.View>
       </Animated.View>
     );
   };
@@ -840,15 +909,15 @@ The league will literally look quite different in 2025 as eight teams – the Bi
           if (trimmedParagraph.startsWith('## ')) {
             // Heading
             contentElements.push(
-              <Text key={`heading-${index}-${pIndex}`} style={styles.readerHeading}>
+              <Text key={`heading-${index}-${pIndex}`} style={[styles.readerHeading, { color: colors.text }]} selectable selectionColor={colors.icon}>
                 {trimmedParagraph.replace('## ', '')}
               </Text>
             );
           } else if (trimmedParagraph.startsWith('> ')) {
             // Quote
             contentElements.push(
-              <View key={`quote-${index}-${pIndex}`} style={styles.quoteContainer}>
-                <Text style={styles.readerQuote}>
+              <View key={`quote-${index}-${pIndex}`} style={[styles.quoteContainer, { backgroundColor: colors.surface, borderLeftColor: colors.border }]}>
+                <Text style={[styles.readerQuote, { color: colors.text }]} selectable selectionColor={colors.icon}>
                   {trimmedParagraph.replace('> ', '')}
                 </Text>
               </View>
@@ -856,21 +925,21 @@ The league will literally look quite different in 2025 as eight teams – the Bi
           } else if (trimmedParagraph.startsWith('*') && trimmedParagraph.endsWith('*')) {
             // Caption
             contentElements.push(
-              <Text key={`caption-${index}-${pIndex}`} style={styles.readerCaption}>
+              <Text key={`caption-${index}-${pIndex}`} style={[styles.readerCaption, { color: colors.textMuted }]} selectable selectionColor={colors.icon}>
                 {trimmedParagraph.replace(/^\*|\*$/g, '')}
               </Text>
             );
           } else if (trimmedParagraph.startsWith('• ')) {
             // List item
             contentElements.push(
-              <Text key={`list-${index}-${pIndex}`} style={styles.readerListItem}>
+              <Text key={`list-${index}-${pIndex}`} style={[styles.readerListItem, { color: colors.text }]} selectable selectionColor={colors.icon}>
                 {trimmedParagraph}
               </Text>
             );
           } else {
             // Regular paragraph
             contentElements.push(
-              <Text key={`paragraph-${index}-${pIndex}`} style={styles.readerText}>
+              <Text key={`paragraph-${index}-${pIndex}`} style={[styles.readerText, { color: colors.text }]} selectable selectionColor={colors.icon}>
                 {trimmedParagraph}
               </Text>
             );
@@ -884,20 +953,35 @@ The league will literally look quite different in 2025 as eight teams – the Bi
 
   const renderArticleReader = () => (
     <Modal visible={!!selectedArticle} animationType="slide" presentationStyle="fullScreen">
-      <View style={styles.readerContainer}>
+      <View style={[styles.readerContainer, { backgroundColor: colors.bg }]}>
         <View style={styles.readerHeader}>
           <TouchableOpacity 
-            style={styles.backButtonContainer}
+            style={[styles.backButtonContainer, { backgroundColor: colors.chip }]}
             onPress={() => setSelectedArticle(null)}
           >
-            <Ionicons name="close" size={20} color="#666" />
+            <Ionicons name="arrow-back" size={24} color={colors.icon} />
           </TouchableOpacity>
+          <View style={styles.readerHeaderRight}>
+            <TouchableOpacity 
+              style={[styles.readerHeaderButton, { backgroundColor: colors.chip }]}
+              onPress={() => selectedArticle && toggleBookmark(selectedArticle.id)}
+            >
+              <Ionicons 
+                name={selectedArticle?.bookmarked ? "bookmark" : "bookmark-outline"} 
+                size={20} 
+                color={colors.icon} 
+              />
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.readerHeaderButton, { backgroundColor: colors.chip }]}>
+              <Ionicons name="share-outline" size={20} color={colors.icon} />
+            </TouchableOpacity>
+          </View>
         </View>
         
         {selectedArticle && (
           <ScrollView style={styles.readerContent} showsVerticalScrollIndicator={false}>
-            <Text style={styles.readerTitle}>{selectedArticle.title}</Text>
-            <Text style={styles.readerDate}>{selectedArticle.date}</Text>
+            <Text style={[styles.readerTitle, { color: colors.text }]} selectable selectionColor={colors.icon}>{selectedArticle.title}</Text>
+            <Text style={[styles.readerDate, { color: colors.textMuted }]} selectable selectionColor={colors.icon}>{selectedArticle.date}</Text>
             {selectedArticle.imageUrl && (
               <Image 
                 source={{ uri: selectedArticle.imageUrl }} 
@@ -910,50 +994,79 @@ The league will literally look quite different in 2025 as eight teams – the Bi
             </View>
           </ScrollView>
         )}
+        
+        {/* Article Reader Action Buttons */}
+        {selectedArticle && (
+          <>
+            <Animated.View style={[styles.readerLeftButton, { backgroundColor: colors.surface, transform: [{ scale: leftButtonScale }] }]}>
+              <TouchableOpacity
+                style={styles.readerButtonTouchable}
+                onPressIn={() => {
+                  Animated.spring(leftButtonScale, {
+                    toValue: 0.95,
+                    useNativeDriver: true,
+                    tension: 300,
+                    friction: 10,
+                  }).start();
+                }}
+                onPressOut={() => {
+                  Animated.spring(leftButtonScale, {
+                    toValue: 1,
+                    useNativeDriver: true,
+                    tension: 300,
+                    friction: 10,
+                  }).start();
+                }}
+                activeOpacity={1}
+              >
+                <Ionicons name="pencil" size={36} color={colors.icon} />
+              </TouchableOpacity>
+            </Animated.View>
+            <Animated.View style={[styles.readerRightButton, { backgroundColor: colors.surface, transform: [{ scale: rightButtonScale }] }]}>
+              <TouchableOpacity
+                style={styles.readerButtonTouchable}
+                onPressIn={() => {
+                  Animated.spring(rightButtonScale, {
+                    toValue: 0.95,
+                    useNativeDriver: true,
+                    tension: 300,
+                    friction: 10,
+                  }).start();
+                }}
+                onPressOut={() => {
+                  Animated.spring(rightButtonScale, {
+                    toValue: 1,
+                    useNativeDriver: true,
+                    tension: 300,
+                    friction: 10,
+                  }).start();
+                }}
+                activeOpacity={1}
+              >
+                <Ionicons name="book" size={36} color={colors.icon} />
+              </TouchableOpacity>
+            </Animated.View>
+          </>
+        )}
       </View>
     </Modal>
   );
 
+
   const renderAddModal = () => {
-    const modalScale = new Animated.Value(showAddModal ? 1 : 0.8);
-    const modalOpacity = new Animated.Value(showAddModal ? 1 : 0);
-    
-    React.useEffect(() => {
-      if (showAddModal) {
-        Animated.parallel([
-          Animated.spring(modalScale, {
-            toValue: 1,
-            useNativeDriver: true,
-            tension: 100,
-            friction: 8,
-          }),
-          Animated.timing(modalOpacity, {
-            toValue: 1,
-            duration: 200,
-            useNativeDriver: true,
-          }),
-        ]).start();
-      }
-    }, [showAddModal]);
     
     return (
       <Modal visible={showAddModal} transparent animationType="none">
-        <Animated.View style={[styles.modalOverlay, { opacity: modalOpacity }]}>
-          <Animated.View
-            style={[
-              styles.modalContent,
-              {
-                transform: [{ scale: modalScale }],
-              },
-            ]}
-          >
+        <View style={styles.modalOverlay}>
+          <BlurView intensity={40} style={StyleSheet.absoluteFill} />
+          <View style={styles.modalContent}>
             <TouchableOpacity
               onPress={handleAddArticle}
               activeOpacity={0.8}
               disabled={isLoading}
             >
-                      <LinearGradient
-                colors={['#ffffff', '#f5f5f5']}
+              <LinearGradient
+                colors={['#474747', '#1a1a1a']}
                 style={[styles.pasteButton, isLoading && styles.pasteButtonDisabled]}
               >
                 {isLoading ? (
@@ -966,34 +1079,123 @@ The league will literally look quite different in 2025 as eight teams – the Bi
                 )}
               </LinearGradient>
             </TouchableOpacity>
+
+            {/* Upload file button with identical style */}
             <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={handleAddButtonPress}
-              activeOpacity={0.6}
+              onPress={async () => {
+                try {
+                  const result = await DocumentPicker.getDocumentAsync({
+                    type: '*/*',
+                    multiple: false,
+                    copyToCacheDirectory: true,
+                  });
+                  // Handle both SDK shapes: result.assets or result.uri
+                  if ((result as any).canceled) {
+                    return;
+                  }
+                  const asset = (result as any).assets?.[0] || result;
+                  const fileName = asset.name || 'Selected file';
+                  const uri = asset.uri;
+                  const mimeType = asset.mimeType || 'unknown';
+                  Alert.alert('File selected', `${fileName}\nType: ${mimeType}`);
+                  // TODO: Process the file content (PDF, HTML, etc.) as needed
+                } catch (e) {
+                  console.error('File picker error', e);
+                  Alert.alert('Upload failed', 'There was a problem selecting a file.');
+                }
+              }}
+              activeOpacity={0.8}
             >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
+              <LinearGradient
+                colors={['#474747', '#1a1a1a']}
+                style={[styles.pasteButton]}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                  <Ionicons name="cloud-upload-outline" size={18} color="#faf9f7" style={{ marginRight: 8 }} />
+                  <Text style={styles.pasteButtonText}>Upload file</Text>
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+          
+          {/* Plus button inside modal to ensure it's on top */}
+          <Animated.View style={[
+            styles.addButtonInModal,
+            {
+              backgroundColor: '#1a1918',
+              borderColor: '#faf9f7',
+              transform: [
+                { scale: scaleAnim },
+              ],
+            },
+          ]}>
+            <TouchableOpacity
+              style={styles.addButtonTouchable}
+              onPress={handleAddButtonPress}
+            >
+              <Animated.View style={{
+                transform: [
+                  {
+                    rotate: rotateAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: ['0deg', '45deg'],
+                    }),
+                  },
+                ],
+              }}>
+                <Ionicons 
+                  name="add" 
+                  size={52} 
+                  color="#faf9f7" 
+                />
+              </Animated.View>
             </TouchableOpacity>
           </Animated.View>
-        </Animated.View>
+        </View>
       </Modal>
     );
   };
 
+  // Get themed colors
+  const colors = getTheme(darkMode);
+
   return (
-    <View style={styles.container}>
-      <StatusBar style="dark" />
+    <View style={[styles.container, { backgroundColor: colors.bg }]}>
+      <StatusBar style={darkMode ? 'light' : 'dark'} />
       
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Your articles</Text>
+        <Text style={[styles.headerTitle, { color: colors.text } ]}>Your articles</Text>
         <View style={styles.headerActions}>
           {!deleteMode && (
-            <TouchableOpacity style={styles.searchButton} onPress={toggleSearch}>
-              <Ionicons name="search" size={20} color="#666" />
-            </TouchableOpacity>
+            <>
+              <TouchableOpacity 
+                style={[styles.searchButton, { backgroundColor: colors.chip }]} 
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setShowBookmarkedOnly(!showBookmarkedOnly);
+                }}
+              >
+                <Ionicons 
+                  name={showBookmarkedOnly ? "bookmark" : "bookmark-outline"} 
+                  size={20} 
+                  color={colors.icon} 
+                />
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.searchButton, { backgroundColor: colors.chip }]} onPress={toggleSearch}>
+                <Ionicons name="search" size={20} color={colors.icon} />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.searchButton, { backgroundColor: colors.chip }]} 
+                onPress={handleOpenSettings}
+                accessibilityLabel="Open settings"
+              >
+                <Ionicons name="settings-outline" size={20} color={colors.icon} />
+              </TouchableOpacity>
+            </>
           )}
           {deleteMode && (
             <TouchableOpacity style={styles.doneButton} onPress={exitDeleteMode}>
-              <Text style={styles.doneButtonText}>Done</Text>
+              <Text style={[styles.doneButtonText, { color: colors.text } ]}>Done</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -1002,13 +1204,20 @@ The league will literally look quite different in 2025 as eight teams – the Bi
       {showSearch && (
         <View style={styles.searchContainer}>
           <TextInput
-            style={styles.searchInput}
+            style={[
+              styles.searchInput,
+              { backgroundColor: darkMode ? colors.surface : colors.surface,
+                borderColor: colors.border,
+                color: colors.text,
+              }
+            ]}
             placeholder="Search articles..."
-            placeholderTextColor="#999"
+            placeholderTextColor={darkMode ? '#8c8f94' : '#999'}
             value={searchQuery}
             onChangeText={setSearchQuery}
             autoFocus
             clearButtonMode="while-editing"
+            selectionColor={colors.icon}
           />
         </View>
       )}
@@ -1020,17 +1229,17 @@ The league will literally look quite different in 2025 as eight teams – the Bi
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#666"
-            colors={['#666']}
-            progressBackgroundColor="#f8f9fa"
+            tintColor={colors.icon}
+            colors={[colors.icon]}
+            progressBackgroundColor={colors.bg}
           />
         }
       >
         <View style={styles.articlesGrid}>
           {filteredArticles.length === 0 && searchQuery ? (
             <View style={styles.noResultsContainer}>
-              <Text style={styles.noResultsText}>No articles found</Text>
-              <Text style={styles.noResultsSubtext}>Try adjusting your search terms</Text>
+              <Text style={[styles.noResultsText, { color: colors.text } ]}>No articles found</Text>
+              <Text style={[styles.noResultsSubtext, { color: colors.textMuted } ]}>Try adjusting your search terms</Text>
             </View>
           ) : (
             filteredArticles.map(renderArticleCard)
@@ -1038,40 +1247,44 @@ The league will literally look quite different in 2025 as eight teams – the Bi
         </View>
       </ScrollView>
 
-      {renderAddModal()}
       {renderArticleReader()}
+      {renderAddModal()}
       
-      <Animated.View style={[
-        styles.addButton,
-        showAddModal && styles.addButtonActive,
-        {
-          transform: [
-            { scale: scaleAnim },
-          ],
-        },
-      ]}>
-        <TouchableOpacity
-          style={styles.addButtonTouchable}
-          onPress={handleAddButtonPress}
-        >
-          <Animated.View style={{
+      {/* Add button only when modal is not shown */}
+      {!showAddModal && (
+        <Animated.View style={[
+          styles.addButton,
+          {
+            backgroundColor: colors.surface,
+            borderColor: darkMode ? 'transparent' : 'transparent',
             transform: [
-              {
-                rotate: rotateAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: ['0deg', '45deg'],
-                }),
-              },
+              { scale: scaleAnim },
             ],
-          }}>
-            <Ionicons 
-              name="add" 
-              size={48} 
-              color="#000000" 
-            />
-          </Animated.View>
-        </TouchableOpacity>
-      </Animated.View>
+          },
+        ]}>
+          <TouchableOpacity
+            style={styles.addButtonTouchable}
+            onPress={handleAddButtonPress}
+          >
+            <Animated.View style={{
+              transform: [
+                {
+                  rotate: rotateAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0deg', '45deg'],
+                  }),
+                },
+              ],
+            }}>
+              <Ionicons 
+                name="add" 
+                size={48} 
+                color={colors.icon} 
+              />
+            </Animated.View>
+          </TouchableOpacity>
+        </Animated.View>
+      )}
     </View>
   );
 }
@@ -1079,10 +1292,10 @@ The league will literally look quite different in 2025 as eight teams – the Bi
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#f6f4f1',
   },
   header: {
-    paddingTop: 60,
+    paddingTop: 70,
     paddingHorizontal: 24,
     paddingBottom: 20,
     flexDirection: 'row',
@@ -1090,10 +1303,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
     color: '#1a1a1a',
     flex: 1,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia-Bold' : 'serif',
   },
   headerActions: {
     flexDirection: 'row',
@@ -1103,7 +1317,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#edebe8',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 8,
@@ -1113,13 +1327,13 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   searchInput: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#faf9f7',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: '#e8e6e3',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
@@ -1152,7 +1366,7 @@ const styles = StyleSheet.create({
   },
   articleCard: {
     width: cardWidth,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#faf9f7',
     borderRadius: 12,
     marginBottom: 16,
     shadowColor: '#000',
@@ -1193,18 +1407,18 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#faf9f7',
     borderWidth: 2,
     borderColor: 'transparent',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 12,
-    elevation: 8,
-    zIndex: 10,
+    elevation: 9999,
+    zIndex: 9999,
   },
   addButtonActive: {
-    borderColor: '#000000',
+    borderColor: '#1a1918',
   },
   addButtonTouchable: {
     width: '100%',
@@ -1220,7 +1434,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#faf9f7',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
@@ -1240,15 +1454,18 @@ const styles = StyleSheet.create({
   },
   doneButtonText: {
     fontSize: 16,
-    color: '#000000',
+    color: '#1a1918',
     fontWeight: '600',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(248, 249, 250, 0.95)',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 1,
+    zIndex: 100,
+  },
+  whiteOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255, 255, 255, 0.33)',
   },
   modalContent: {
     alignItems: 'center',
@@ -1268,7 +1485,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   pasteButtonText: {
-    color: '#000000',
+    color: '#faf9f7',
     fontSize: 16,
     fontWeight: '600',
     textAlign: 'center',
@@ -1287,30 +1504,36 @@ const styles = StyleSheet.create({
   loadingSpinner: {
     marginRight: 8,
   },
-  cancelButton: {
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-  },
-  cancelButtonText: {
-    color: '#666',
-    fontSize: 16,
-  },
   readerContainer: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#faf9f7',
   },
   readerHeader: {
-    paddingTop: 60,
+    paddingTop: 70,
     paddingHorizontal: 24,
     paddingBottom: 16,
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   backButtonContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#f0f0f0',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#edebe8',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  readerHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  readerHeaderButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#edebe8',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1321,10 +1544,12 @@ const styles = StyleSheet.create({
   },
   readerTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
     lineHeight: 32,
     marginBottom: 8,
+    fontWeight: 'bold',
+    color: '#1a1a1a',
+    flex: 1,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia-Bold' : 'serif',
   },
   readerDate: {
     fontSize: 14,
@@ -1376,10 +1601,10 @@ const styles = StyleSheet.create({
   },
   quoteContainer: {
     borderLeftWidth: 4,
-    borderLeftColor: '#e0e0e0',
+    borderLeftColor: '#e8e6e3',
     paddingLeft: 16,
     marginVertical: 16,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#f6f4f1',
     paddingVertical: 12,
     borderRadius: 8,
   },
@@ -1403,5 +1628,60 @@ const styles = StyleSheet.create({
     color: '#2c2c2c',
     marginBottom: 8,
     paddingLeft: 8,
+  },
+  addButtonInModal: {
+    position: 'absolute',
+    bottom: 50,
+    left: '50%',
+    marginLeft: -40,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#faf9f7',
+    borderWidth: 3.5,
+    borderColor: '#1a1918',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+    zIndex: 10,
+  },
+  readerLeftButton: {
+    position: 'absolute',
+    bottom: 50,
+    left: 30,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#faf9f7',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+    zIndex: 10,
+  },
+  readerRightButton: {
+    position: 'absolute',
+    bottom: 50,
+    right: 30,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#faf9f7',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+    zIndex: 10,
+  },
+  readerButtonTouchable: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 40,
   },
 });
