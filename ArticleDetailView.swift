@@ -20,6 +20,14 @@ struct ArticleDetailView: View {
     @State private var isReadingAloud = false
     @State private var currentReadingWordIndex = -1
     @State private var showAIChat = false
+    
+    // Annotation Mode States
+    @State private var annotationMode = false
+    
+    // Store original reading tool states for restoration
+    @State private var originalCenterStageEnabled = true
+    @State private var originalTunnelVisionEnabled = false
+    @State private var originalBionicReadingEnabled = false
 
     var body: some View {
         ZStack {
@@ -135,14 +143,43 @@ struct ArticleDetailView: View {
                                 )
                                 .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
                         }
+                        
+                        // Annotation Button
+                        Button {
+                            toggleAnnotationMode()
+                        } label: {
+                            Image(systemName: "pencil")
+                                .font(.system(size: 18, weight: .medium))
+                                .foregroundColor(annotationMode ? 
+                                               (colorScheme == .dark ? Color.themeBlack : Color.themeWhiteDark) :
+                                               (colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack))
+                                .frame(width: 44, height: 44)
+                                .background(annotationMode ? 
+                                          (colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack) :
+                                          (colorScheme == .dark ? Color.themeRaisedDark : Color.themeRaised))
+                                .clipShape(Circle())
+                                .overlay(
+                                    Circle()
+                                        .stroke(colorScheme == .dark ? Color.themeStrokeDark : Color.themeStroke, lineWidth: 0.5)
+                                )
+                                .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+                        }
                     }
                 }
                 
                 Spacer()
                 
-                // AI Companion Button (Bottom Right)
+                // Bottom buttons layout
                 HStack {
+                    // Annotation Tools Pill (Left)
+                    if annotationMode {
+                        annotationToolsPill
+                            .transition(.scale.combined(with: .opacity))
+                    }
+                    
                     Spacer()
+                    
+                    // AI Companion Button (Bottom Right)
                     Button {
                         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                             showAIChat = true
@@ -633,8 +670,8 @@ struct ArticleDetailView: View {
         LazyVStack(alignment: .leading, spacing: 20) {
             ForEach(Array(article.content.enumerated()), id: \.offset) { index, contentItem in
                 contentItemView(contentItem, index: index)
-                    .scaleEffect(centerStageEnabled && centeredBlockIndex == index ? 1.05 : 1.0)
-                    .blur(radius: tunnelVisionEnabled ? (centeredBlockIndex == index ? 0 : 4) : 0)
+                    .scaleEffect(!annotationMode && centerStageEnabled && centeredBlockIndex == index ? 1.05 : 1.0)
+                    .blur(radius: !annotationMode && tunnelVisionEnabled ? (centeredBlockIndex == index ? 0 : 4) : 0)
                     .animation(.easeInOut(duration: 0.3), value: centeredBlockIndex)
                     .animation(.easeInOut(duration: 0.4), value: tunnelVisionEnabled)
                     .animation(.easeInOut(duration: 0.3), value: centerStageEnabled)
@@ -681,16 +718,31 @@ struct ArticleDetailView: View {
     
     // MARK: - Content View Functions
     private func headingView(text: String, level: Int) -> some View {
-        Text(text)
-            .font(.system(size: headingSize(for: level), weight: .bold, design: .serif))
-            .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
-            .padding(.top, level == 1 ? 32 : 24)
-            .padding(.bottom, 12)
+        Group {
+            if annotationMode {
+                Text(text)
+                    .font(.system(size: headingSize(for: level), weight: .bold, design: .serif))
+                    .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
+                    .padding(.top, level == 1 ? 32 : 24)
+                    .padding(.bottom, 12)
+            } else {
+                Text(text)
+                    .font(.system(size: headingSize(for: level), weight: .bold, design: .serif))
+                    .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
+                    .padding(.top, level == 1 ? 32 : 24)
+                    .padding(.bottom, 12)
+            }
+        }
     }
     
     private func paragraphView(text: String) -> some View {
         Group {
-            if bionicReadingEnabled {
+            if annotationMode {
+                Text(text)
+                    .font(customFont)
+                    .lineSpacing(lineSpacing)
+                    .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
+            } else if bionicReadingEnabled {
                 bionicText(text)
                     .lineSpacing(lineSpacing)
             } else {
@@ -813,18 +865,33 @@ struct ArticleDetailView: View {
     
     private func quoteView(text: String, author: String?) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(text)
-                .font(.system(size: 19, weight: .regular, design: .serif))
-                .italic()
-                .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
-                .padding(.leading, 16)
-                .overlay(
-                    Rectangle()
-                        .fill(Color.accentColor)
-                        .frame(width: 4)
-                        .padding(.leading, 0),
-                    alignment: .leading
-                )
+            if annotationMode {
+                Text(text)
+                    .font(.system(size: 19, weight: .regular, design: .serif))
+                    .italic()
+                    .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
+                    .padding(.leading, 16)
+                    .overlay(
+                        Rectangle()
+                            .fill(Color.accentColor)
+                            .frame(width: 4)
+                            .padding(.leading, 0),
+                        alignment: .leading
+                    )
+            } else {
+                Text(text)
+                    .font(.system(size: 19, weight: .regular, design: .serif))
+                    .italic()
+                    .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
+                    .padding(.leading, 16)
+                    .overlay(
+                        Rectangle()
+                            .fill(Color.accentColor)
+                            .frame(width: 4)
+                            .padding(.leading, 0),
+                        alignment: .leading
+                    )
+            }
             
             if let author = author, !author.isEmpty {
                 Text("— \(author)")
@@ -932,6 +999,85 @@ struct ArticleDetailView: View {
         case .instagram: return "Instagram"
         case .other(let name): return name.capitalized
         }
+    }
+    
+    // MARK: - Annotation Functions
+    private func toggleAnnotationMode() {
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            if annotationMode {
+                // Exiting annotation mode - restore original reading tools
+                centerStageEnabled = originalCenterStageEnabled
+                tunnelVisionEnabled = originalTunnelVisionEnabled
+                bionicReadingEnabled = originalBionicReadingEnabled
+                annotationMode = false
+            } else {
+                // Entering annotation mode - store current states and disable reading tools
+                originalCenterStageEnabled = centerStageEnabled
+                originalTunnelVisionEnabled = tunnelVisionEnabled
+                originalBionicReadingEnabled = bionicReadingEnabled
+                
+                centerStageEnabled = false
+                tunnelVisionEnabled = false
+                bionicReadingEnabled = false
+                annotationMode = true
+            }
+        }
+    }
+    
+    // MARK: - Annotation Tools Pill
+    private var annotationToolsPill: some View {
+        HStack(spacing: 20) {
+            // Bold Button
+            Button {
+                // TODO: Implement bold formatting
+                print("Bold button tapped")
+            } label: {
+                Text("B")
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
+                    .frame(width: 44, height: 44)
+                    .background(colorScheme == .dark ? Color.themeRaisedDark : Color.themeRaised)
+                    .clipShape(Circle())
+            }
+            
+            // Italic Button
+            Button {
+                // TODO: Implement italic formatting
+                print("Italic button tapped")
+            } label: {
+                Text("I")
+                    .font(.system(size: 20, weight: .medium))
+                    .italic()
+                    .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
+                    .frame(width: 44, height: 44)
+                    .background(colorScheme == .dark ? Color.themeRaisedDark : Color.themeRaised)
+                    .clipShape(Circle())
+            }
+            
+            // Highlight Button
+            Button {
+                // TODO: Implement highlight formatting
+                print("Highlight button tapped")
+            } label: {
+                Image(systemName: "highlighter")
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
+                    .frame(width: 44, height: 44)
+                    .background(colorScheme == .dark ? Color.themeRaisedDark : Color.themeRaised)
+                    .clipShape(Circle())
+            }
+        }
+        .padding(.horizontal, 24)
+        .padding(.vertical, 16)
+        .background(
+            RoundedRectangle(cornerRadius: 30)
+                .fill(colorScheme == .dark ? Color.themeBackgroundDark : Color.themeBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 30)
+                        .stroke(colorScheme == .dark ? Color.themeStrokeDark : Color.themeStroke, lineWidth: 0.5)
+                )
+        )
+        .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
     }
     
     // MARK: - Helper Functions
