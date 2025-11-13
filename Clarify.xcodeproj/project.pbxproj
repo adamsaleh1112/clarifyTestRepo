@@ -132,6 +132,8 @@
 				TargetAttributes = {
 					A0FFFFFD294A1234567890AB = {
 						CreatedOnToolsVersion = 15.0;
+						DevelopmentTeam = GG2H8A5KTB;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -329,7 +331,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = GG2H8A5KTB;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Clarify/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -362,7 +364,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = GG2H8A5KTB;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Clarify/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
