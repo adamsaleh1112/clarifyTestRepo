@@ -115,6 +115,9 @@
 			);
 			dependencies = (
 			);
+			packageProductDependencies = (
+				A1000040294A1234567890AB /* SwiftSoup */,
+			);
 			name = Clarify;
 			productName = Clarify;
 			productReference = A0FFFFFE294A1234567890AB /* Clarify.app */;
@@ -151,6 +154,9 @@
 			projectRoot = "";
 			targets = (
 				A0FFFFFD294A1234567890AB /* Clarify */,
+			);
+			packageReferences = (
+				A1000041294A1234567890AB /* XCRemoteSwiftPackageReference "SwiftSoup" */,
 			);
 		};
 /* End PBXProject section */
@@ -411,6 +417,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A1000041294A1234567890AB /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.6.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A1000040294A1234567890AB /* SwiftSoup */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A1000041294A1234567890AB /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			productName = SwiftSoup;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = A0FFFFF6294A1234567890AB /* Project object */;
 }
