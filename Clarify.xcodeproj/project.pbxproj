@@ -18,6 +18,7 @@
 		A2E02D4C2E8F27FE0078B852 /* OpenAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2E02D4B2E8F27FE0078B852 /* OpenAIService.swift */; };
 		A2E02D4E2E8F66F50078B852 /* PDFViewerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2E02D4D2E8F66F50078B852 /* PDFViewerView.swift */; };
 		A2E02D502E8F69500078B852 /* ArticleDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2E02D4F2E8F69500078B852 /* ArticleDataManager.swift */; };
+		A2FA7B352E936281004CBFC6 /* Clarify App Icon.icon in Resources */ = {isa = PBXBuildFile; fileRef = A2FA7B342E936281004CBFC6 /* Clarify App Icon.icon */; };
 		A72F8473C9612C5D08D83298 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0BC3E71BB62E9C683F22207 /* ContentView.swift */; };
 		B2B508BB5AD8E99D0F134057 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AD37CB9476AF4DAAE3E3D766 /* LaunchScreen.storyboard */; };
 		B3252A33AB5E8DA2DA3A8702 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0F8344B9C5986128B3EE939 /* SettingsView.swift */; };
@@ -37,6 +38,7 @@
 		A2E02D4B2E8F27FE0078B852 /* OpenAIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIService.swift; sourceTree = "<group>"; };
 		A2E02D4D2E8F66F50078B852 /* PDFViewerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFViewerView.swift; sourceTree = "<group>"; };
 		A2E02D4F2E8F69500078B852 /* ArticleDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArticleDataManager.swift; sourceTree = "<group>"; };
+		A2FA7B342E936281004CBFC6 /* Clarify App Icon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = "Clarify App Icon.icon"; sourceTree = "<group>"; };
 		AD37CB9476AF4DAAE3E3D766 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		AE7599C10EF81C3CDB6ADFF9 /* Color+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Extensions.swift"; sourceTree = "<group>"; };
 		B70CCC7CB280229172C80FAE /* ArticleGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArticleGridView.swift; sourceTree = "<group>"; };
@@ -86,6 +88,7 @@
 				D0BC3E71BB62E9C683F22207 /* ContentView.swift */,
 				AD37CB9476AF4DAAE3E3D766 /* LaunchScreen.storyboard */,
 				C0F8344B9C5986128B3EE939 /* SettingsView.swift */,
+				A2FA7B342E936281004CBFC6 /* Clarify App Icon.icon */,
 			);
 			path = Clarify;
 			sourceTree = "<group>";
@@ -138,11 +141,6 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
-				TargetAttributes = {
-					671DEE4A1AC49C787D1EE589 = {
-						DevelopmentTeam = YOUR_TEAM_ID;
-					};
-				};
 			};
 			buildConfigurationList = 87FB9E67834B91B6721150D4 /* Build configuration list for PBXProject "Clarify" */;
 			compatibilityVersion = "Xcode 14.0";
@@ -172,6 +170,7 @@
 			files = (
 				099F5FDFFEE5EDA06CCC65EF /* Assets.xcassets in Resources */,
 				B2B508BB5AD8E99D0F134057 /* LaunchScreen.storyboard in Resources */,
+				A2FA7B352E936281004CBFC6 /* Clarify App Icon.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -260,9 +259,9 @@
 		3EB5D854270EDE7D510636F5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "Clarify App Icon";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = YOUR_TEAM_ID;
+				DEVELOPMENT_TEAM = GG2H8A5KTB;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Clarify/Info.plist;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
@@ -342,9 +341,9 @@
 		73B3D3C3FDB18BE239A9773E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "Clarify App Icon";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = YOUR_TEAM_ID;
+				DEVELOPMENT_TEAM = GG2H8A5KTB;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Clarify/Info.plist;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;

@@ -9,9 +9,24 @@ struct ArticleGridView: View {
     let onLongPress: () -> Void
     let onArticleTap: (Article) -> Void
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    @Environment(\.verticalSizeClass) var verticalSizeClass
     
     @State private var showDeleteAlert = false
     @State private var articleToDelete: Article?
+    
+    // Computed property to determine column count based on size classes
+    private var columnCount: Int {
+        // Use size classes to determine device type and orientation
+        // Regular horizontal size class typically indicates iPad
+        if horizontalSizeClass == .regular {
+            // iPad: 3 columns in portrait (regular/regular), 5 columns in landscape (regular/compact)
+            return verticalSizeClass == .compact ? 5 : 3
+        } else {
+            // iPhone: Always 2 columns (compact horizontal size class)
+            return 2
+        }
+    }
     
     var body: some View {
         ScrollView {
@@ -25,15 +40,15 @@ struct ArticleGridView: View {
                 .padding(.horizontal, 26)
                 .padding(.vertical, 16)
             } else {
-                // Grid Mode - Responsive 2-column grid
+                // Grid Mode - Responsive grid based on device and orientation
                 let sidePadding: CGFloat = 26
                 let columnSpacing: CGFloat = 40  // Double the original 20px
                 let rowSpacing: CGFloat = 20     // Use the original column spacing value
                 
-                LazyVGrid(columns: [
-                    GridItem(.flexible(), spacing: columnSpacing/2),
-                    GridItem(.flexible(), spacing: columnSpacing/2)
-                ], spacing: rowSpacing) {
+                // Create dynamic columns based on columnCount
+                let columns = Array(repeating: GridItem(.flexible(), spacing: columnSpacing/2), count: columnCount)
+                
+                LazyVGrid(columns: columns, spacing: rowSpacing) {
                     ForEach(articles) { article in
                         GeometryReader { geometry in
                             let columnWidth = geometry.size.width

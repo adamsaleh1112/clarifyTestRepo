@@ -5,9 +5,15 @@ class OpenAIService: ObservableObject {
     private let baseURL = "https://api.openai.com/v1/chat/completions"
     
     init() {
-        // Get API key from environment or plist
-        // For security, never hardcode the API key
-        self.apiKey = Bundle.main.object(forInfoDictionaryKey: "OPENAI_API_KEY") as? String ?? ""
+        // Get API key from environment configuration
+        // This will check environment variables, .env file, and Info.plist in that order
+        self.apiKey = EnvironmentConfig.shared.openAIAPIKey
+        
+        // Log configuration status in debug builds
+        #if DEBUG
+        print("🔑 OpenAI Configuration:")
+        print(EnvironmentConfig.shared.getConfigurationStatus())
+        #endif
     }
     
     func sendMessage(_ message: String, articleContext: String? = nil) async throws -> String {
