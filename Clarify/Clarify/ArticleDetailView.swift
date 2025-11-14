@@ -1,4 +1,109 @@
 import SwiftUI
+import UIKit
+
+// MARK: - SelectableTextView
+struct SelectableTextView: UIViewRepresentable {
+    let text: String
+    let font: UIFont
+    let textColor: UIColor
+    let lineSpacing: CGFloat
+    @Binding var selectedText: String
+    @Binding var selectedRange: NSRange
+    var onTextSelected: (() -> Void)? = nil
+    
+    func makeUIView(context: Context) -> UITextView {
+        let textView = UITextView()
+        textView.delegate = context.coordinator
+        textView.isEditable = false
+        textView.isSelectable = true
+        textView.isScrollEnabled = false
+        textView.backgroundColor = UIColor.clear
+        textView.textContainer.lineFragmentPadding = 0
+        textView.textContainerInset = UIEdgeInsets.zero
+        
+        // Configure text wrapping
+        textView.textContainer.widthTracksTextView = true
+        textView.textContainer.heightTracksTextView = true
+        textView.textContainer.maximumNumberOfLines = 0
+        textView.textContainer.lineBreakMode = .byWordWrapping
+        
+        // Ensure proper sizing behavior for text wrapping
+        textView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        textView.setContentHuggingPriority(.defaultHigh, for: .vertical)
+        
+        // Configure text with attributes
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = lineSpacing
+        paragraphStyle.lineBreakMode = .byWordWrapping
+        paragraphStyle.alignment = .natural
+        
+        let attributedString = NSAttributedString(
+            string: text,
+            attributes: [
+                .font: font,
+                .foregroundColor: textColor,
+                .paragraphStyle: paragraphStyle
+            ]
+        )
+        
+        textView.attributedText = attributedString
+        
+        return textView
+    }
+    
+    func updateUIView(_ uiView: UITextView, context: Context) {
+        // Ensure text wrapping is configured
+        uiView.textContainer.widthTracksTextView = true
+        uiView.textContainer.heightTracksTextView = true
+        uiView.textContainer.maximumNumberOfLines = 0
+        uiView.textContainer.lineBreakMode = .byWordWrapping
+        
+        // Ensure proper sizing behavior for text wrapping
+        uiView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        uiView.setContentHuggingPriority(.defaultHigh, for: .vertical)
+        
+        // Update text color and font if needed
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = lineSpacing
+        paragraphStyle.lineBreakMode = .byWordWrapping
+        paragraphStyle.alignment = .natural
+        
+        let attributedString = NSAttributedString(
+            string: text,
+            attributes: [
+                .font: font,
+                .foregroundColor: textColor,
+                .paragraphStyle: paragraphStyle
+            ]
+        )
+        
+        uiView.attributedText = attributedString
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
+    class Coordinator: NSObject, UITextViewDelegate {
+        let parent: SelectableTextView
+        
+        init(_ parent: SelectableTextView) {
+            self.parent = parent
+        }
+        
+        func textViewDidChangeSelection(_ textView: UITextView) {
+            let selectedRange = textView.selectedRange
+            if selectedRange.length > 0 {
+                let selectedText = (textView.text as NSString).substring(with: selectedRange)
+                DispatchQueue.main.async {
+                    self.parent.selectedText = selectedText
+                    self.parent.selectedRange = selectedRange
+                    self.parent.onTextSelected?()
+                }
+            }
+        }
+    }
+}
 
 struct ArticleDetailView: View {
     let article: Article
@@ -20,6 +125,16 @@ struct ArticleDetailView: View {
     @State private var isReadingAloud = false
     @State private var currentReadingWordIndex = -1
     @State private var showAIChat = false
+    
+    // Annotation Mode States
+    @State private var annotationMode = false
+    @State private var selectedText = ""
+    @State private var selectedRange = NSRange(location: 0, length: 0)
+    
+    // Store original reading tool states for restoration
+    @State private var originalCenterStageEnabled = true
+    @State private var originalTunnelVisionEnabled = false
+    @State private var originalBionicReadingEnabled = false
 
     var body: some View {
         ZStack {
@@ -135,14 +250,43 @@ struct ArticleDetailView: View {
                                 )
                                 .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
                         }
+                        
+                        // Annotation Button
+                        Button {
+                            toggleAnnotationMode()
+                        } label: {
+                            Image(systemName: "pencil")
+                                .font(.system(size: 18, weight: .medium))
+                                .foregroundColor(annotationMode ? 
+                                               (colorScheme == .dark ? Color.themeBlack : Color.themeWhiteDark) :
+                                               (colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack))
+                                .frame(width: 44, height: 44)
+                                .background(annotationMode ? 
+                                          (colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack) :
+                                          (colorScheme == .dark ? Color.themeRaisedDark : Color.themeRaised))
+                                .clipShape(Circle())
+                                .overlay(
+                                    Circle()
+                                        .stroke(colorScheme == .dark ? Color.themeStrokeDark : Color.themeStroke, lineWidth: 0.5)
+                                )
+                                .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+                        }
                     }
                 }
                 
                 Spacer()
                 
-                // AI Companion Button (Bottom Right)
+                // Bottom buttons layout
                 HStack {
+                    // Annotation Tools Pill (Left)
+                    if annotationMode {
+                        annotationToolsPill
+                            .transition(.scale.combined(with: .opacity))
+                    }
+                    
                     Spacer()
+                    
+                    // AI Companion Button (Bottom Right)
                     Button {
                         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                             showAIChat = true
@@ -633,8 +777,8 @@ struct ArticleDetailView: View {
         LazyVStack(alignment: .leading, spacing: 20) {
             ForEach(Array(article.content.enumerated()), id: \.offset) { index, contentItem in
                 contentItemView(contentItem, index: index)
-                    .scaleEffect(centerStageEnabled && centeredBlockIndex == index ? 1.05 : 1.0)
-                    .blur(radius: tunnelVisionEnabled ? (centeredBlockIndex == index ? 0 : 4) : 0)
+                    .scaleEffect(!annotationMode && centerStageEnabled && centeredBlockIndex == index ? 1.05 : 1.0)
+                    .blur(radius: !annotationMode && tunnelVisionEnabled ? (centeredBlockIndex == index ? 0 : 4) : 0)
                     .animation(.easeInOut(duration: 0.3), value: centeredBlockIndex)
                     .animation(.easeInOut(duration: 0.4), value: tunnelVisionEnabled)
                     .animation(.easeInOut(duration: 0.3), value: centerStageEnabled)
@@ -681,16 +825,54 @@ struct ArticleDetailView: View {
     
     // MARK: - Content View Functions
     private func headingView(text: String, level: Int) -> some View {
-        Text(text)
-            .font(.system(size: headingSize(for: level), weight: .bold, design: .serif))
-            .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
-            .padding(.top, level == 1 ? 32 : 24)
-            .padding(.bottom, 12)
+        Group {
+            if annotationMode {
+                VStack(spacing: 0) {
+                    Spacer()
+                        .frame(height: level == 1 ? 32 : 24)
+                    
+                    SelectableTextView(
+                        text: text,
+                        font: uiFontForHeading(size: headingSize(for: level)),
+                        textColor: textColor,
+                        lineSpacing: 0,
+                        selectedText: $selectedText,
+                        selectedRange: $selectedRange,
+                        onTextSelected: {
+                            print("Heading selected: \(selectedText)")
+                        }
+                    )
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    Spacer()
+                        .frame(height: 12)
+                }
+            } else {
+                Text(text)
+                    .font(.system(size: headingSize(for: level), weight: .bold, design: .serif))
+                    .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
+                    .padding(.top, level == 1 ? 32 : 24)
+                    .padding(.bottom, 12)
+            }
+        }
     }
     
     private func paragraphView(text: String) -> some View {
         Group {
-            if bionicReadingEnabled {
+            if annotationMode {
+                SelectableTextView(
+                    text: text,
+                    font: uiFont(from: customFont, size: fontSize),
+                    textColor: textColor,
+                    lineSpacing: lineSpacing,
+                    selectedText: $selectedText,
+                    selectedRange: $selectedRange,
+                    onTextSelected: {
+                        print("Text selected: \(selectedText)")
+                    }
+                )
+                .frame(maxWidth: .infinity, alignment: .leading)
+            } else if bionicReadingEnabled {
                 bionicText(text)
                     .lineSpacing(lineSpacing)
             } else {
@@ -746,34 +928,59 @@ struct ArticleDetailView: View {
     }
     
     private func richParagraphView(segments: [TextSegment]) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .top, spacing: 0) {
-                ForEach(segments) { segment in
+        Group {
+            if annotationMode {
+                // Combine all segments into plain text for selection in annotation mode
+                let combinedText = segments.map { segment in
                     switch segment {
-                    case .text(let text):
-                        Text(text)
-                            .font(.system(size: 17, weight: .medium, design: .serif))
-                            .lineSpacing(10)
-                            .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
-                    case .boldText(let text):
-                        Text(text)
-                            .font(.system(size: 17, weight: .bold, design: .serif))
-                            .lineSpacing(10)
-                            .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
-                    case .italicText(let text):
-                        Text(text)
-                            .font(.system(size: 17, weight: .medium, design: .serif))
-                            .italic()
-                            .lineSpacing(10)
-                            .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
-                    case .link(let text, let url):
-                        Link(text, destination: url)
-                            .font(.system(size: 17, weight: .regular, design: .serif))
-                            .underline()
-                            .foregroundColor(.accentColor)
+                    case .text(let text), .boldText(let text), .italicText(let text), .link(let text, _):
+                        return text
+                    }
+                }.joined()
+                
+                SelectableTextView(
+                    text: combinedText,
+                    font: uiFont(from: customFont, size: 17),
+                    textColor: textColor,
+                    lineSpacing: 10,
+                    selectedText: $selectedText,
+                    selectedRange: $selectedRange,
+                    onTextSelected: {
+                        print("Rich paragraph selected: \(selectedText)")
+                    }
+                )
+                .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                VStack(alignment: .leading, spacing: 0) {
+                    HStack(alignment: .top, spacing: 0) {
+                        ForEach(segments) { segment in
+                            switch segment {
+                            case .text(let text):
+                                Text(text)
+                                    .font(.system(size: 17, weight: .medium, design: .serif))
+                                    .lineSpacing(10)
+                                    .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
+                            case .boldText(let text):
+                                Text(text)
+                                    .font(.system(size: 17, weight: .bold, design: .serif))
+                                    .lineSpacing(10)
+                                    .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
+                            case .italicText(let text):
+                                Text(text)
+                                    .font(.system(size: 17, weight: .medium, design: .serif))
+                                    .italic()
+                                    .lineSpacing(10)
+                                    .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
+                            case .link(let text, let url):
+                                Link(text, destination: url)
+                                    .font(.system(size: 17, weight: .regular, design: .serif))
+                                    .underline()
+                                    .foregroundColor(.accentColor)
+                            }
+                        }
+                        Spacer()
                     }
                 }
-                Spacer()
             }
         }
         .padding(.bottom, 16)
@@ -813,18 +1020,40 @@ struct ArticleDetailView: View {
     
     private func quoteView(text: String, author: String?) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(text)
-                .font(.system(size: 19, weight: .regular, design: .serif))
-                .italic()
-                .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
-                .padding(.leading, 16)
-                .overlay(
+            if annotationMode {
+                HStack(spacing: 0) {
                     Rectangle()
                         .fill(Color.accentColor)
                         .frame(width: 4)
-                        .padding(.leading, 0),
-                    alignment: .leading
-                )
+                    
+                    SelectableTextView(
+                        text: text,
+                        font: uiFontForQuote(size: 19),
+                        textColor: textColor,
+                        lineSpacing: 0,
+                        selectedText: $selectedText,
+                        selectedRange: $selectedRange,
+                        onTextSelected: {
+                            print("Quote selected: \(selectedText)")
+                        }
+                    )
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(EdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 0))
+                }
+            } else {
+                Text(text)
+                    .font(.system(size: 19, weight: .regular, design: .serif))
+                    .italic()
+                    .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
+                    .padding(.leading, 16)
+                    .overlay(
+                        Rectangle()
+                            .fill(Color.accentColor)
+                            .frame(width: 4)
+                            .padding(.leading, 0),
+                        alignment: .leading
+                    )
+            }
             
             if let author = author, !author.isEmpty {
                 Text("— \(author)")
@@ -934,6 +1163,85 @@ struct ArticleDetailView: View {
         }
     }
     
+    // MARK: - Annotation Functions
+    private func toggleAnnotationMode() {
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            if annotationMode {
+                // Exiting annotation mode - restore original reading tools
+                centerStageEnabled = originalCenterStageEnabled
+                tunnelVisionEnabled = originalTunnelVisionEnabled
+                bionicReadingEnabled = originalBionicReadingEnabled
+                annotationMode = false
+            } else {
+                // Entering annotation mode - store current states and disable reading tools
+                originalCenterStageEnabled = centerStageEnabled
+                originalTunnelVisionEnabled = tunnelVisionEnabled
+                originalBionicReadingEnabled = bionicReadingEnabled
+                
+                centerStageEnabled = false
+                tunnelVisionEnabled = false
+                bionicReadingEnabled = false
+                annotationMode = true
+            }
+        }
+    }
+    
+    // MARK: - Annotation Tools Pill
+    private var annotationToolsPill: some View {
+        HStack(spacing: 20) {
+            // Bold Button
+            Button {
+                // TODO: Implement bold formatting
+                print("Bold button tapped")
+            } label: {
+                Text("B")
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
+                    .frame(width: 44, height: 44)
+                    .background(colorScheme == .dark ? Color.themeRaisedDark : Color.themeRaised)
+                    .clipShape(Circle())
+            }
+            
+            // Italic Button
+            Button {
+                // TODO: Implement italic formatting
+                print("Italic button tapped")
+            } label: {
+                Text("I")
+                    .font(.system(size: 20, weight: .medium))
+                    .italic()
+                    .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
+                    .frame(width: 44, height: 44)
+                    .background(colorScheme == .dark ? Color.themeRaisedDark : Color.themeRaised)
+                    .clipShape(Circle())
+            }
+            
+            // Highlight Button
+            Button {
+                // TODO: Implement highlight formatting
+                print("Highlight button tapped")
+            } label: {
+                Image(systemName: "highlighter")
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
+                    .frame(width: 44, height: 44)
+                    .background(colorScheme == .dark ? Color.themeRaisedDark : Color.themeRaised)
+                    .clipShape(Circle())
+            }
+        }
+        .padding(.horizontal, 24)
+        .padding(.vertical, 16)
+        .background(
+            Capsule()
+                .fill(colorScheme == .dark ? Color.themeBackgroundDark : Color.themeBackground)
+                .overlay(
+                    Capsule()
+                        .stroke(colorScheme == .dark ? Color.themeStrokeDark : Color.themeStroke, lineWidth: 0.5)
+                )
+        )
+        .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+    }
+    
     // MARK: - Helper Functions
     private func headingSize(for level: Int) -> CGFloat {
         switch level {
@@ -978,6 +1286,62 @@ struct ArticleDetailView: View {
                 self.centeredBlockIndex = closestBlock
             }
         }
+    }
+    
+    // MARK: - Text Selection Helper Functions
+    private func uiFont(from font: Font, size: CGFloat) -> UIFont {
+        switch selectedFont {
+        case "Source Serif Pro":
+            // Use serif system font with medium weight to match SwiftUI's .serif design
+            if let serifDescriptor = UIFontDescriptor.preferredFontDescriptor(withTextStyle: .body).withDesign(.serif) {
+                let mediumDescriptor = serifDescriptor.addingAttributes([
+                    UIFontDescriptor.AttributeName.traits: [
+                        UIFontDescriptor.TraitKey.weight: UIFont.Weight.medium
+                    ]
+                ])
+                return UIFont(descriptor: mediumDescriptor, size: size)
+            }
+            return UIFont(name: "Times-Roman", size: size) ?? UIFont.systemFont(ofSize: size, weight: .medium)
+        case "Times New Roman":
+            return UIFont(name: "Times-Roman", size: size) ?? UIFont.systemFont(ofSize: size, weight: .medium)
+        case "Georgia":
+            return UIFont(name: "Georgia", size: size) ?? UIFont.systemFont(ofSize: size, weight: .medium)
+        case "System Sans Serif":
+            return UIFont.systemFont(ofSize: size, weight: .medium)
+        default:
+            // Default to serif design with medium weight to match SwiftUI's default
+            if let serifDescriptor = UIFontDescriptor.preferredFontDescriptor(withTextStyle: .body).withDesign(.serif) {
+                let mediumDescriptor = serifDescriptor.addingAttributes([
+                    UIFontDescriptor.AttributeName.traits: [
+                        UIFontDescriptor.TraitKey.weight: UIFont.Weight.medium
+                    ]
+                ])
+                return UIFont(descriptor: mediumDescriptor, size: size)
+            }
+            return UIFont(name: "Times-Roman", size: size) ?? UIFont.systemFont(ofSize: size, weight: .medium)
+        }
+    }
+    
+    private func uiFontForHeading(size: CGFloat) -> UIFont {
+        // Headings always use serif with bold weight
+        if let serifDescriptor = UIFontDescriptor.preferredFontDescriptor(withTextStyle: .body).withDesign(.serif) {
+            let boldDescriptor = serifDescriptor.withSymbolicTraits(.traitBold) ?? serifDescriptor
+            return UIFont(descriptor: boldDescriptor, size: size)
+        }
+        return UIFont.boldSystemFont(ofSize: size)
+    }
+    
+    private func uiFontForQuote(size: CGFloat) -> UIFont {
+        // Quotes use serif with italic styling
+        if let serifDescriptor = UIFontDescriptor.preferredFontDescriptor(withTextStyle: .body).withDesign(.serif) {
+            let italicDescriptor = serifDescriptor.withSymbolicTraits(.traitItalic) ?? serifDescriptor
+            return UIFont(descriptor: italicDescriptor, size: size)
+        }
+        return UIFont.italicSystemFont(ofSize: size)
+    }
+    
+    private var textColor: UIColor {
+        colorScheme == .dark ? UIColor(Color.themeWhiteDark) : UIColor(Color.themeBlack)
     }
 }
 

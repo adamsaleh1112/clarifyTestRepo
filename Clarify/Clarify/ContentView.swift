@@ -151,7 +151,7 @@ struct ContentView: View {
     
     private var headerSection: some View {
         HStack {
-            Text("Your articles")
+            Text("Library")
                 .font(.system(size: 32.3, weight: .bold, design: .default))
                 .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
             Spacer()
@@ -263,7 +263,7 @@ struct ContentView: View {
                 Spacer()
             } else if dataManager.articles.isEmpty {
                 Spacer()
-                Text("Your articles")
+                Text("Library")
                     .font(.system(size: 32.3, weight: .bold, design: .default))
                     .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                     .opacity(0.5)
