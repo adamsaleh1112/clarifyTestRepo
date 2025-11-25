@@ -44,9 +44,9 @@ struct OnboardingOverlay: View {
                         )
                         
                         OnboardingFeature(
-                            icon: "brain.head.profile",
-                            title: "AI Summary",
-                            description: "Get instant AI-powered summaries of any article"
+                            icon: "c.circle.fill",
+                            title: "AI Chat Assistant",
+                            description: "Tap the 'C' button to chat with AI about the article content"
                         )
                         
                         OnboardingFeature(

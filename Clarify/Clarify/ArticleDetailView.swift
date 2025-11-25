@@ -21,9 +21,6 @@ struct ArticleDetailView: View {
     @State private var isReadingAloud = false
     @State private var currentReadingWordIndex = -1
     @State private var showAIChat = false
-    @State private var showAISummary = false
-    @State private var aiSummaryText = ""
-    @State private var isGeneratingSummary = false
     @State private var readingProgress: Double = 0.0
     @State private var showOnboarding = false
 
@@ -105,26 +102,6 @@ struct ArticleDetailView: View {
                     
                     // Top Right Buttons
                     HStack(spacing: 12) {
-                        // AI Summary Button
-                        Button {
-                            print("🔥 AI Button tapped - calling generateAISummary()")
-                            generateAISummary()
-                            HapticsManager.shared.readingToolToggled()
-                        } label: {
-                            Image(systemName: isGeneratingSummary ? "ellipsis" : "brain.head.profile")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
-                                .frame(width: 44, height: 44)
-                                .background(colorScheme == .dark ? Color.themeRaisedDark : Color.themeRaised)
-                                .clipShape(Circle())
-                                .overlay(
-                                    Circle()
-                                        .stroke(colorScheme == .dark ? Color.themeStrokeDark : Color.themeStroke, lineWidth: 0.5)
-                                )
-                                .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
-                        }
-                        .disabled(isGeneratingSummary)
-                        
                         // Text Customization Button
                         Button {
                             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
@@ -229,13 +206,6 @@ struct ArticleDetailView: View {
                         return ""
                     }
                 }.joined(separator: "\n\n")
-            )
-        }
-        .sheet(isPresented: $showAISummary) {
-            AISummaryView(
-                title: article.title,
-                summary: aiSummaryText,
-                onDismiss: { showAISummary = false }
             )
         }
         .navigationBarHidden(true)
@@ -1084,68 +1054,6 @@ struct ArticleDetailView: View {
         }
     }
     
-    // MARK: - AI Summary
-    private func generateAISummary() {
-        print("🧠 AI Summary button tapped!")
-        guard !isGeneratingSummary else { 
-            print("⚠️ Already generating summary")
-            return 
-        }
-        
-        if let existingSummary = article.aiSummary {
-            print("✅ Using cached summary")
-            aiSummaryText = existingSummary
-            showAISummary = true
-            return
-        }
-        
-        print("🔄 Starting AI summary generation...")
-        isGeneratingSummary = true
-        
-        Task {
-            do {
-                let openAIService = OpenAIService()
-                print("📝 Content length: \(article.content.count) items")
-                let contentText = article.content.compactMap { content in
-                    switch content {
-                    case .paragraph(let text), .heading(let text, _), .quote(let text, _):
-                        return text
-                    case .richParagraph(let segments):
-                        return segments.compactMap { segment in
-                            switch segment {
-                            case .text(let text), .boldText(let text), .italicText(let text), .link(let text, _):
-                                return text
-                            }
-                        }.joined(separator: " ")
-                    case .list(let items, _):
-                        return items.joined(separator: " ")
-                    default:
-                        return nil
-                    }
-                }.joined(separator: "\n\n")
-                
-                let prompt = "Please provide a concise 2-3 sentence summary of this article:\n\n\(contentText)"
-                print("🤖 Sending prompt to OpenAI (length: \(prompt.count) chars)")
-                let summary = try await openAIService.sendMessage(prompt)
-                print("✅ Received summary: \(summary.prefix(100))...")
-                
-                DispatchQueue.main.async {
-                    self.aiSummaryText = summary
-                    self.isGeneratingSummary = false
-                    self.showAISummary = true
-                    self.dataManager.updateAISummary(self.article, summary: summary)
-                    HapticsManager.shared.summaryGenerated()
-                }
-            } catch {
-                print("❌ AI Summary error: \(error)")
-                DispatchQueue.main.async {
-                    self.isGeneratingSummary = false
-                    // Show error state - could show an alert here
-                    print("🔄 Reset generating state")
-                }
-            }
-        }
-    }
     
     // MARK: - Onboarding
     private func checkForOnboarding() {
