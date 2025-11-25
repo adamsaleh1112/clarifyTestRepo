@@ -26,6 +26,10 @@
 		DF84360F1A07C20B4A93290F /* ClarifyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9D98D3841F816E43C9A1FE3 /* ClarifyApp.swift */; };
 		F45B1F938EC7417851B331ED /* Article.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60943A40DA07E15A37F2727C /* Article.swift */; };
 		E0E0E0E02EFFFF0000000001 /* EnvironmentConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E0E0E02EFFFF0000000000 /* EnvironmentConfig.swift */; };
+		E0E0E0E02EFFFF0000000002 /* HapticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E0E0E02EFFFF0000000003 /* HapticsManager.swift */; };
+		E0E0E0E02EFFFF0000000004 /* AISummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E0E0E02EFFFF0000000005 /* AISummaryView.swift */; };
+		E0E0E0E02EFFFF0000000006 /* ContinueReadingCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E0E0E02EFFFF0000000007 /* ContinueReadingCard.swift */; };
+		E0E0E0E02EFFFF0000000008 /* OnboardingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E0E0E02EFFFF0000000009 /* OnboardingOverlay.swift */; };
 		/* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -49,6 +53,10 @@
 		D0BC3E71BB62E9C683F22207 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		D9D98D3841F816E43C9A1FE3 /* ClarifyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClarifyApp.swift; sourceTree = "<group>"; };
 		E0E0E0E02EFFFF0000000000 /* EnvironmentConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentConfig.swift; sourceTree = "<group>"; };
+		E0E0E0E02EFFFF0000000003 /* HapticsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsManager.swift; sourceTree = "<group>"; };
+		E0E0E0E02EFFFF0000000005 /* AISummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AISummaryView.swift; sourceTree = "<group>"; };
+		E0E0E0E02EFFFF0000000007 /* ContinueReadingCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinueReadingCard.swift; sourceTree = "<group>"; };
+		E0E0E0E02EFFFF0000000009 /* OnboardingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingOverlay.swift; sourceTree = "<group>"; };
 		/* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -92,6 +100,10 @@
 				C0F8344B9C5986128B3EE939 /* SettingsView.swift */,
 				A2FA7B342E936281004CBFC6 /* Clarify App Icon.icon */,
 				E0E0E0E02EFFFF0000000000 /* EnvironmentConfig.swift */,
+				E0E0E0E02EFFFF0000000003 /* HapticsManager.swift */,
+				E0E0E0E02EFFFF0000000005 /* AISummaryView.swift */,
+				E0E0E0E02EFFFF0000000007 /* ContinueReadingCard.swift */,
+				E0E0E0E02EFFFF0000000009 /* OnboardingOverlay.swift */,
 			);
 			path = Clarify;
 			sourceTree = "<group>";
@@ -199,6 +211,10 @@
 				B3252A33AB5E8DA2DA3A8702 /* SettingsView.swift in Sources */,
 				A2E02D4C2E8F27FE0078B852 /* OpenAIService.swift in Sources */,
 				E0E0E0E02EFFFF0000000001 /* EnvironmentConfig.swift in Sources */,
+				E0E0E0E02EFFFF0000000002 /* HapticsManager.swift in Sources */,
+				E0E0E0E02EFFFF0000000004 /* AISummaryView.swift in Sources */,
+				E0E0E0E02EFFFF0000000006 /* ContinueReadingCard.swift in Sources */,
+				E0E0E0E02EFFFF0000000008 /* OnboardingOverlay.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

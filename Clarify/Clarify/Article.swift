@@ -45,6 +45,13 @@ struct Article: Identifiable, Codable {
     var pdfTextContent: String? // Extracted text for AI context (not displayed)
     var isPDF: Bool { return pdfURL != nil }
     
+    // Reading progress and metadata
+    var isFavorite: Bool = false
+    var readingProgress: Double = 0.0 // 0.0 to 1.0
+    var lastReadDate: Date?
+    var estimatedReadingTimeMinutes: Int?
+    var aiSummary: String?
+    
     init(title: String, date: String, coverImageURL: URL? = nil, content: [ArticleContent], inlineImages: [String]? = nil, sourceName: String? = nil, sourceLogoURL: URL? = nil, pdfURL: URL? = nil, pdfTextContent: String? = nil) {
         self.id = UUID()
         self.title = title
@@ -56,6 +63,29 @@ struct Article: Identifiable, Codable {
         self.sourceLogoURL = sourceLogoURL
         self.pdfURL = pdfURL
         self.pdfTextContent = pdfTextContent
+        self.estimatedReadingTimeMinutes = Self.calculateReadingTime(content: content)
+    }
+    
+    // Calculate estimated reading time (250 words per minute average)
+    static func calculateReadingTime(content: [ArticleContent]) -> Int {
+        let totalWords = content.reduce(0) { total, item in
+            switch item {
+            case .paragraph(let text), .heading(let text, _), .quote(let text, _):
+                return total + text.split(separator: " ").count
+            case .richParagraph(let segments):
+                return total + segments.reduce(0) { segTotal, segment in
+                    switch segment {
+                    case .text(let text), .boldText(let text), .italicText(let text), .link(let text, _):
+                        return segTotal + text.split(separator: " ").count
+                    }
+                }
+            case .list(let items, _):
+                return total + items.reduce(0) { $0 + $1.split(separator: " ").count }
+            default:
+                return total
+            }
+        }
+        return max(1, Int(Double(totalWords) / 250.0))
     }
 }
 

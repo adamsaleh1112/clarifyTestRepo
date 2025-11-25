@@ -270,23 +270,108 @@ struct ContentView: View {
                 Spacer()
                 Spacer()
             } else {
-                // Article Grid
-                ArticleGridView(
-                    articles: filteredArticles,
-                    isListMode: isListMode,
-                    deleteMode: $deleteMode,
-                    deleteButtonsScale: $deleteButtonsScale,
-                    onDelete: { article in
-                        deleteArticle(article)
-                    },
-                    onLongPress: {
-                        print("🔥 Long press triggered in ContentView!")
-                        enterDeleteMode()
-                    },
-                    onArticleTap: { article in
-                        selectedArticle = article
+                ScrollView {
+                    LazyVStack(spacing: 32) {
+                        // Continue Reading Section
+                        if !dataManager.recentlyReadArticles.isEmpty && !isSearching {
+                            VStack(alignment: .leading, spacing: 16) {
+                                HStack {
+                                    Text("Continue Reading")
+                                        .font(.system(size: 22, weight: .bold))
+                                        .foregroundColor(.primary)
+                                    
+                                    Spacer()
+                                }
+                                .padding(.horizontal, 26)
+                                
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 16) {
+                                        ForEach(dataManager.recentlyReadArticles) { article in
+                                            ContinueReadingCard(
+                                                article: article,
+                                                onTap: {
+                                                    selectedArticle = article
+                                                    HapticsManager.shared.articleOpened()
+                                                }
+                                            )
+                                        }
+                                    }
+                                    .padding(.horizontal, 26)
+                                    .padding(.bottom, 12)
+                                }
+                            }
+                        }
+                        
+                        // Favorites Section
+                        if !dataManager.favoriteArticles.isEmpty && !isSearching {
+                            VStack(alignment: .leading, spacing: 16) {
+                                HStack {
+                                    Text("Favorites")
+                                        .font(.system(size: 22, weight: .bold))
+                                        .foregroundColor(.primary)
+                                    
+                                    Spacer()
+                                }
+                                .padding(.horizontal, 26)
+                                
+                                ArticleGridView(
+                                    articles: Array(dataManager.favoriteArticles.prefix(6)),
+                                    isListMode: isListMode,
+                                    deleteMode: $deleteMode,
+                                    deleteButtonsScale: $deleteButtonsScale,
+                                    onDelete: { article in
+                                        deleteArticle(article)
+                                    },
+                                    onLongPress: {
+                                        enterDeleteMode()
+                                    },
+                                    onArticleTap: { article in
+                                        selectedArticle = article
+                                        HapticsManager.shared.articleOpened()
+                                    },
+                                    onFavoriteToggle: { article in
+                                        dataManager.toggleFavorite(article)
+                                    }
+                                )
+                            }
+                        }
+                        
+                        // All Articles Section
+                        VStack(alignment: .leading, spacing: 16) {
+                            if !isSearching && (!dataManager.recentlyReadArticles.isEmpty || !dataManager.favoriteArticles.isEmpty) {
+                                HStack {
+                                    Text("All Articles")
+                                        .font(.system(size: 22, weight: .bold))
+                                        .foregroundColor(.primary)
+                                    
+                                    Spacer()
+                                }
+                                .padding(.horizontal, 26)
+                            }
+                            
+                            ArticleGridView(
+                                articles: filteredArticles,
+                                isListMode: isListMode,
+                                deleteMode: $deleteMode,
+                                deleteButtonsScale: $deleteButtonsScale,
+                                onDelete: { article in
+                                    deleteArticle(article)
+                                },
+                                onLongPress: {
+                                    print("🔥 Long press triggered in ContentView!")
+                                    enterDeleteMode()
+                                },
+                                onArticleTap: { article in
+                                    selectedArticle = article
+                                    HapticsManager.shared.articleOpened()
+                                },
+                                onFavoriteToggle: { article in
+                                    dataManager.toggleFavorite(article)
+                                }
+                            )
+                        }
                     }
-                )
+                }
             }
         }
     }
@@ -367,7 +452,7 @@ struct ContentView: View {
                     if article.isPDF, let pdfURL = article.pdfURL {
                         PDFViewerView(pdfURL: pdfURL, fileName: article.title, pdfTextContent: article.pdfTextContent)
                     } else {
-                        ArticleDetailView(article: article)
+                        ArticleDetailView(article: article, dataManager: dataManager)
                     }
                 }
             }

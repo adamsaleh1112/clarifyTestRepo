@@ -29,6 +29,40 @@ class ArticleDataManager: ObservableObject {
         }
     }
     
+    func toggleFavorite(_ article: Article) {
+        if let index = articles.firstIndex(where: { $0.id == article.id }) {
+            articles[index].isFavorite.toggle()
+            saveArticles()
+        }
+    }
+    
+    func updateReadingProgress(_ article: Article, progress: Double) {
+        if let index = articles.firstIndex(where: { $0.id == article.id }) {
+            articles[index].readingProgress = progress
+            articles[index].lastReadDate = Date()
+            saveArticles()
+        }
+    }
+    
+    func updateAISummary(_ article: Article, summary: String) {
+        if let index = articles.firstIndex(where: { $0.id == article.id }) {
+            articles[index].aiSummary = summary
+            saveArticles()
+        }
+    }
+    
+    var favoriteArticles: [Article] {
+        articles.filter { $0.isFavorite }
+    }
+    
+    var recentlyReadArticles: [Article] {
+        articles
+            .filter { $0.readingProgress > 0.1 && $0.readingProgress < 1.0 }
+            .sorted { ($0.lastReadDate ?? Date.distantPast) > ($1.lastReadDate ?? Date.distantPast) }
+            .prefix(5)
+            .map { $0 }
+    }
+    
     // MARK: - Private Methods
     
     private func saveArticles() {

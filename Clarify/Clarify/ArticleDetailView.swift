@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ArticleDetailView: View {
     let article: Article
+    let dataManager: ArticleDataManager
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.presentationMode) var presentationMode
     
@@ -20,6 +21,11 @@ struct ArticleDetailView: View {
     @State private var isReadingAloud = false
     @State private var currentReadingWordIndex = -1
     @State private var showAIChat = false
+    @State private var showAISummary = false
+    @State private var aiSummaryText = ""
+    @State private var isGeneratingSummary = false
+    @State private var readingProgress: Double = 0.0
+    @State private var showOnboarding = false
 
     var body: some View {
         ZStack {
@@ -50,6 +56,7 @@ struct ArticleDetailView: View {
                 }
                 .onAppear {
                     screenHeight = outerGeometry.size.height
+                    checkForOnboarding()
                 }
             }
             
@@ -98,11 +105,32 @@ struct ArticleDetailView: View {
                     
                     // Top Right Buttons
                     HStack(spacing: 12) {
+                        // AI Summary Button
+                        Button {
+                            print("🔥 AI Button tapped - calling generateAISummary()")
+                            generateAISummary()
+                            HapticsManager.shared.readingToolToggled()
+                        } label: {
+                            Image(systemName: isGeneratingSummary ? "ellipsis" : "brain.head.profile")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
+                                .frame(width: 44, height: 44)
+                                .background(colorScheme == .dark ? Color.themeRaisedDark : Color.themeRaised)
+                                .clipShape(Circle())
+                                .overlay(
+                                    Circle()
+                                        .stroke(colorScheme == .dark ? Color.themeStrokeDark : Color.themeStroke, lineWidth: 0.5)
+                                )
+                                .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+                        }
+                        .disabled(isGeneratingSummary)
+                        
                         // Text Customization Button
                         Button {
                             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                                 showFontCustomization = true
                             }
+                            HapticsManager.shared.readingToolToggled()
                         } label: {
                             Text("Aa")
                                 .font(.system(size: 16, weight: .semibold))
@@ -122,6 +150,7 @@ struct ArticleDetailView: View {
                             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                                 showReadingTools = true
                             }
+                            HapticsManager.shared.readingToolToggled()
                         } label: {
                             Image(systemName: "book")
                                 .font(.system(size: 18, weight: .medium))
@@ -172,6 +201,11 @@ struct ArticleDetailView: View {
             
             // Reading Tools Overlay
             readingToolsOverlay
+            
+            // Onboarding Overlay
+            if showOnboarding {
+                OnboardingOverlay(isPresented: $showOnboarding)
+            }
         }
         .sheet(isPresented: $showAIChat) {
             AIChatView(
@@ -195,6 +229,13 @@ struct ArticleDetailView: View {
                         return ""
                     }
                 }.joined(separator: "\n\n")
+            )
+        }
+        .sheet(isPresented: $showAISummary) {
+            AISummaryView(
+                title: article.title,
+                summary: aiSummaryText,
+                onDismiss: { showAISummary = false }
             )
         }
         .navigationBarHidden(true)
@@ -562,7 +603,44 @@ struct ArticleDetailView: View {
                 .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 20)
-                .padding(.bottom, 32)
+                .padding(.bottom, 16)
+            
+            // Reading metadata
+            HStack(spacing: 16) {
+                if let readingTime = article.estimatedReadingTimeMinutes {
+                    HStack(spacing: 4) {
+                        Image(systemName: "clock")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.secondary)
+                        Text("\(readingTime) min read")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.secondary)
+                    }
+                }
+                
+                if readingProgress > 0 {
+                    HStack(spacing: 4) {
+                        Image(systemName: "book")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.secondary)
+                        Text("\(Int(readingProgress * 100))% read")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+            .padding(.bottom, 16)
+            
+            // Reading progress bar
+            if readingProgress > 0 {
+                VStack(spacing: 8) {
+                    ProgressView(value: readingProgress)
+                        .progressViewStyle(LinearProgressViewStyle(tint: .blue))
+                        .frame(maxWidth: 200)
+                        .scaleEffect(y: 0.8)
+                }
+                .padding(.bottom, 16)
+            }
             
             // Horizontal line separator
             Rectangle()
@@ -975,9 +1053,108 @@ struct ArticleDetailView: View {
             }
         }
         
+        // Update reading progress
+        updateReadingProgress()
+        
         DispatchQueue.main.async {
             if self.centeredBlockIndex != closestBlock {
                 self.centeredBlockIndex = closestBlock
+            }
+        }
+    }
+    
+    // MARK: - Reading Progress
+    private func updateReadingProgress() {
+        guard !blockPositions.isEmpty else { return }
+        
+        let totalBlocks = article.content.count
+        let visibleBlocks = blockPositions.keys.filter { index in
+            let frame = blockPositions[index]!
+            let blockTop = frame.minY + scrollOffset
+            let blockBottom = frame.maxY + scrollOffset
+            return blockBottom > 0 && blockTop < screenHeight
+        }
+        
+        let progress = Double(visibleBlocks.count) / Double(totalBlocks)
+        let clampedProgress = min(1.0, max(0.0, progress))
+        
+        if abs(clampedProgress - readingProgress) > 0.05 {
+            readingProgress = clampedProgress
+            dataManager.updateReadingProgress(article, progress: clampedProgress)
+        }
+    }
+    
+    // MARK: - AI Summary
+    private func generateAISummary() {
+        print("🧠 AI Summary button tapped!")
+        guard !isGeneratingSummary else { 
+            print("⚠️ Already generating summary")
+            return 
+        }
+        
+        if let existingSummary = article.aiSummary {
+            print("✅ Using cached summary")
+            aiSummaryText = existingSummary
+            showAISummary = true
+            return
+        }
+        
+        print("🔄 Starting AI summary generation...")
+        isGeneratingSummary = true
+        
+        Task {
+            do {
+                let openAIService = OpenAIService()
+                print("📝 Content length: \(article.content.count) items")
+                let contentText = article.content.compactMap { content in
+                    switch content {
+                    case .paragraph(let text), .heading(let text, _), .quote(let text, _):
+                        return text
+                    case .richParagraph(let segments):
+                        return segments.compactMap { segment in
+                            switch segment {
+                            case .text(let text), .boldText(let text), .italicText(let text), .link(let text, _):
+                                return text
+                            }
+                        }.joined(separator: " ")
+                    case .list(let items, _):
+                        return items.joined(separator: " ")
+                    default:
+                        return nil
+                    }
+                }.joined(separator: "\n\n")
+                
+                let prompt = "Please provide a concise 2-3 sentence summary of this article:\n\n\(contentText)"
+                print("🤖 Sending prompt to OpenAI (length: \(prompt.count) chars)")
+                let summary = try await openAIService.sendMessage(prompt)
+                print("✅ Received summary: \(summary.prefix(100))...")
+                
+                DispatchQueue.main.async {
+                    self.aiSummaryText = summary
+                    self.isGeneratingSummary = false
+                    self.showAISummary = true
+                    self.dataManager.updateAISummary(self.article, summary: summary)
+                    HapticsManager.shared.summaryGenerated()
+                }
+            } catch {
+                print("❌ AI Summary error: \(error)")
+                DispatchQueue.main.async {
+                    self.isGeneratingSummary = false
+                    // Show error state - could show an alert here
+                    print("🔄 Reset generating state")
+                }
+            }
+        }
+    }
+    
+    // MARK: - Onboarding
+    private func checkForOnboarding() {
+        let hasShownOnboarding = UserDefaults.standard.bool(forKey: "HasShownReadingOnboarding")
+        if !hasShownOnboarding {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    showOnboarding = true
+                }
             }
         }
     }

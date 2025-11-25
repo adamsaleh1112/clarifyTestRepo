@@ -8,6 +8,7 @@ struct ArticleGridView: View {
     let onDelete: (Article) -> Void
     let onLongPress: () -> Void
     let onArticleTap: (Article) -> Void
+    let onFavoriteToggle: (Article) -> Void
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @Environment(\.verticalSizeClass) var verticalSizeClass
@@ -98,10 +99,25 @@ struct ArticleGridView: View {
                                                 .multilineTextAlignment(.leading)
                                                 .shadow(color: .black.opacity(0.3), radius: 1, x: 0, y: 1)
                                             
-                                            Text(article.date)
-                                                .font(.system(size: 11, weight: .medium, design: .default))
-                                                .foregroundColor(.white.opacity(0.9))
-                                                .shadow(color: .black.opacity(0.3), radius: 1, x: 0, y: 1)
+                                            HStack {
+                                                Text(article.date)
+                                                    .font(.system(size: 11, weight: .medium, design: .default))
+                                                    .foregroundColor(.white.opacity(0.9))
+                                                    .shadow(color: .black.opacity(0.3), radius: 1, x: 0, y: 1)
+                                                
+                                                if let readingTime = article.estimatedReadingTimeMinutes {
+                                                    Text("·")
+                                                        .font(.system(size: 11, weight: .medium))
+                                                        .foregroundColor(.white.opacity(0.7))
+                                                    
+                                                    Text("\(readingTime) min read")
+                                                        .font(.system(size: 11, weight: .medium, design: .default))
+                                                        .foregroundColor(.white.opacity(0.9))
+                                                        .shadow(color: .black.opacity(0.3), radius: 1, x: 0, y: 1)
+                                                }
+                                                
+                                                Spacer()
+                                            }
                                         }
                                         .padding(.horizontal, 12)
                                         .padding(.bottom, 12)
@@ -117,29 +133,56 @@ struct ArticleGridView: View {
                                 .buttonStyle(PlainButtonStyle())
                                 .contentShape(Rectangle())
                                 
-                                // Delete button - positioned absolutely in top-right corner
-                                if deleteMode {
-                                    Button(action: {
-                                        articleToDelete = article
-                                        showDeleteAlert = true
-                                    }) {
-                                        Image(systemName: "xmark")
-                                            .font(.system(size: 12, weight: .bold))
-                                            .foregroundColor(Color.themeBlackDark)
-                                            .frame(width: 24, height: 24)
-                                            .background(Color.themeRaised)
-                                            .clipShape(Circle())
-                                            .overlay(
-                                                Circle()
-                                                    .stroke(colorScheme == .dark ? Color.themeBlack.opacity(0.2) : Color.themeBlack.opacity(0.2), lineWidth: 1)
-                                            )
-                                            .shadow(color: colorScheme == .dark ? Color.themeBlack.opacity(0.2) : Color.themeBlack.opacity(0.2), radius: 2, x: 0, y: 1)
+                                // Top-right buttons
+                                VStack {
+                                    HStack {
+                                        Spacer()
+                                        
+                                        // Favorite button
+                                        if !deleteMode {
+                                            Button(action: {
+                                                onFavoriteToggle(article)
+                                                HapticsManager.shared.favoriteToggled()
+                                            }) {
+                                                Image(systemName: article.isFavorite ? "heart.fill" : "heart")
+                                                    .font(.system(size: 14, weight: .medium))
+                                                    .foregroundColor(article.isFavorite ? .red : .white)
+                                                    .frame(width: 28, height: 28)
+                                                    .background(Color.black.opacity(0.3))
+                                                    .clipShape(Circle())
+                                                    .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 1)
+                                            }
+                                            .padding(.trailing, 8)
+                                            .padding(.top, 8)
+                                        }
+                                        
+                                        // Delete button
+                                        if deleteMode {
+                                            Button(action: {
+                                                articleToDelete = article
+                                                showDeleteAlert = true
+                                            }) {
+                                                Image(systemName: "xmark")
+                                                    .font(.system(size: 12, weight: .bold))
+                                                    .foregroundColor(Color.themeBlackDark)
+                                                    .frame(width: 24, height: 24)
+                                                    .background(Color.themeRaised)
+                                                    .clipShape(Circle())
+                                                    .overlay(
+                                                        Circle()
+                                                            .stroke(colorScheme == .dark ? Color.themeBlack.opacity(0.2) : Color.themeBlack.opacity(0.2), lineWidth: 1)
+                                                    )
+                                                    .shadow(color: colorScheme == .dark ? Color.themeBlack.opacity(0.2) : Color.themeBlack.opacity(0.2), radius: 2, x: 0, y: 1)
+                                            }
+                                            .scaleEffect(deleteButtonsScale)
+                                            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: deleteButtonsScale)
+                                            .padding(.trailing, 8)
+                                            .padding(.top, 8)
+                                        }
                                     }
-                                    .scaleEffect(deleteButtonsScale)
-                                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: deleteButtonsScale)
-                                    .position(x: columnWidth - 10 - 12, y: 22) // 22px from top edge (12 + 10)
-                                    .frame(width: columnWidth, height: columnWidth * 1.45)
+                                    Spacer()
                                 }
+                                .frame(width: columnWidth, height: columnWidth * 1.45)
                             }
                             .simultaneousGesture(
                                 TapGesture()
