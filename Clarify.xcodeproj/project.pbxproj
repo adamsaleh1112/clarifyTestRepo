@@ -25,7 +25,8 @@
 		BAE30EAD17D091710F44A696 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 8D220DFEAE4DB6E9127D05C2 /* SwiftSoup */; };
 		DF84360F1A07C20B4A93290F /* ClarifyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9D98D3841F816E43C9A1FE3 /* ClarifyApp.swift */; };
 		F45B1F938EC7417851B331ED /* Article.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60943A40DA07E15A37F2727C /* Article.swift */; };
-/* End PBXBuildFile section */
+		E0E0E0E02EFFFF0000000001 /* EnvironmentConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E0E0E02EFFFF0000000000 /* EnvironmentConfig.swift */; };
+		/* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		60943A40DA07E15A37F2727C /* Article.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Article.swift; sourceTree = "<group>"; };
@@ -47,7 +48,8 @@
 		C796C0758BC0986BAFCE2117 /* ArticleDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArticleDetailView.swift; sourceTree = "<group>"; };
 		D0BC3E71BB62E9C683F22207 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		D9D98D3841F816E43C9A1FE3 /* ClarifyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClarifyApp.swift; sourceTree = "<group>"; };
-/* End PBXFileReference section */
+		E0E0E0E02EFFFF0000000000 /* EnvironmentConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentConfig.swift; sourceTree = "<group>"; };
+		/* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		B9D2EABBB55CA3A0D0E6465F /* Frameworks */ = {
@@ -89,6 +91,7 @@
 				AD37CB9476AF4DAAE3E3D766 /* LaunchScreen.storyboard */,
 				C0F8344B9C5986128B3EE939 /* SettingsView.swift */,
 				A2FA7B342E936281004CBFC6 /* Clarify App Icon.icon */,
+				E0E0E0E02EFFFF0000000000 /* EnvironmentConfig.swift */,
 			);
 			path = Clarify;
 			sourceTree = "<group>";
@@ -195,6 +198,7 @@
 				A72F8473C9612C5D08D83298 /* ContentView.swift in Sources */,
 				B3252A33AB5E8DA2DA3A8702 /* SettingsView.swift in Sources */,
 				A2E02D4C2E8F27FE0078B852 /* OpenAIService.swift in Sources */,
+				E0E0E0E02EFFFF0000000001 /* EnvironmentConfig.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
