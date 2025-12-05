@@ -7,7 +7,7 @@ struct OnboardingOverlay: View {
     var body: some View {
         ZStack {
             // Semi-transparent background
-            Color.black.opacity(0.8)
+            Color.themeBlack.opacity(0.8)
                 .ignoresSafeArea()
                 .onTapGesture {
                     dismissOnboarding()
@@ -21,7 +21,7 @@ struct OnboardingOverlay: View {
                     // Icon
                     Image(systemName: "book.circle.fill")
                         .font(.system(size: 60))
-                        .foregroundColor(.blue)
+                        .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                     
                     // Title
                     Text("Welcome to Clarify")
@@ -64,12 +64,12 @@ struct OnboardingOverlay: View {
                 Button(action: dismissOnboarding) {
                     Text("Get Started")
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(colorScheme == .dark ? Color.themeBlack : Color.themeWhiteDark)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
                         .background(
                             RoundedRectangle(cornerRadius: 12)
-                                .fill(.blue)
+                                .fill(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                         )
                 }
                 .padding(.horizontal, 40)
@@ -94,12 +94,13 @@ struct OnboardingFeature: View {
     let icon: String
     let title: String
     let description: String
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
             Image(systemName: icon)
                 .font(.system(size: 20, weight: .medium))
-                .foregroundColor(.blue)
+                .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                 .frame(width: 24, height: 24)
             
             VStack(alignment: .leading, spacing: 4) {

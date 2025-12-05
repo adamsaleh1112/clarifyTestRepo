@@ -16,6 +16,7 @@ struct ContentView: View {
     @State private var showFilePicker = false
     @State private var isProcessingSharedURL = false
     @State private var incomingURL: URL? = nil
+    @AppStorage("typography") private var typography: Typography = .modern
     private let articleParser = ArticleParser()
     
     var filteredArticles: [Article] {
@@ -152,7 +153,7 @@ struct ContentView: View {
     private var headerSection: some View {
         HStack {
             Text("Library")
-                .font(.system(size: 32.3, weight: .bold, design: .default))
+                .font(.appTitle(typography: typography))
                 .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
             Spacer()
             
@@ -197,7 +198,7 @@ struct ContentView: View {
                 }) {
                     Text("Done")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.primary)
+                        .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
                 }
@@ -271,14 +272,14 @@ struct ContentView: View {
                 Spacer()
             } else {
                 ScrollView {
-                    LazyVStack(spacing: 32) {
+                    LazyVStack(spacing: 20) {
                         // Continue Reading Section
                         if !dataManager.recentlyReadArticles.isEmpty && !isSearching {
                             VStack(alignment: .leading, spacing: 16) {
                                 HStack {
                                     Text("Continue Reading")
-                                        .font(.system(size: 22, weight: .bold))
-                                        .foregroundColor(.primary)
+                                        .font(.appHeading(typography: typography))
+                                        .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                                     
                                     Spacer()
                                 }
@@ -297,18 +298,18 @@ struct ContentView: View {
                                         }
                                     }
                                     .padding(.horizontal, 26)
-                                    .padding(.bottom, 12)
+                                    .padding(.bottom, 16)
                                 }
                             }
                         }
                         
                         // Favorites Section
                         if !dataManager.favoriteArticles.isEmpty && !isSearching {
-                            VStack(alignment: .leading, spacing: 16) {
+                            VStack(alignment: .leading, spacing: 0) {
                                 HStack {
                                     Text("Favorites")
-                                        .font(.system(size: 22, weight: .bold))
-                                        .foregroundColor(.primary)
+                                        .font(.appHeading(typography: typography))
+                                        .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                                     
                                     Spacer()
                                 }
@@ -337,12 +338,12 @@ struct ContentView: View {
                         }
                         
                         // All Articles Section
-                        VStack(alignment: .leading, spacing: 16) {
+                        VStack(alignment: .leading, spacing: 0) {
                             if !isSearching && (!dataManager.recentlyReadArticles.isEmpty || !dataManager.favoriteArticles.isEmpty) {
                                 HStack {
                                     Text("All Articles")
-                                        .font(.system(size: 22, weight: .bold))
-                                        .foregroundColor(.primary)
+                                        .font(.appHeading(typography: typography))
+                                        .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                                     
                                     Spacer()
                                 }
@@ -379,7 +380,7 @@ struct ContentView: View {
     private var overlaySection: some View {
         Group {
             if showOverlay {
-                Color.black.opacity(0.5).ignoresSafeArea()
+                Color.themeBlack.opacity(0.5).ignoresSafeArea()
                     .onTapGesture {
                         toggleOverlay()
                     }

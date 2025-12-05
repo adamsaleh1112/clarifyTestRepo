@@ -75,15 +75,15 @@ struct ArticleGridView: View {
                                                 .overlay(
                                                     Image(systemName: "photo")
                                                         .font(.system(size: 40))
-                                                        .foregroundColor(.white.opacity(0.6))
+                                                        .foregroundColor(Color.themeWhiteDark.opacity(0.6))
                                                 )
                                         }
                                         
                                         // Bottom gradient overlay
                                         LinearGradient(
                                             gradient: Gradient(colors: [
-                                                Color.black.opacity(0.8),
-                                                Color.black.opacity(0.4),
+                                                Color.themeBlack.opacity(0.8),
+                                                Color.themeBlack.opacity(0.4),
                                                 Color.clear
                                             ]),
                                             startPoint: .bottom,
@@ -146,11 +146,11 @@ struct ArticleGridView: View {
                                             }) {
                                                 Image(systemName: article.isFavorite ? "heart.fill" : "heart")
                                                     .font(.system(size: 14, weight: .medium))
-                                                    .foregroundColor(article.isFavorite ? .red : .white)
+                                                    .foregroundColor(article.isFavorite ? .red : Color.themeWhiteDark)
                                                     .frame(width: 28, height: 28)
-                                                    .background(Color.black.opacity(0.3))
+                                                    .background(Color.themeBlack.opacity(0.3))
                                                     .clipShape(Circle())
-                                                    .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 1)
+                                                    .shadow(color: Color.themeBlack.opacity(0.3), radius: 2, x: 0, y: 1)
                                             }
                                             .padding(.trailing, 8)
                                             .padding(.top, 8)

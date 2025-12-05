@@ -5,6 +5,7 @@ struct ArticleDetailView: View {
     let dataManager: ArticleDataManager
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.presentationMode) var presentationMode
+    @ObservedObject private var readAloudManager = ReadAloudManager.shared
     
     @State private var scrollOffset: CGFloat = 0
     @State private var screenHeight: CGFloat = 0
@@ -183,6 +184,28 @@ struct ArticleDetailView: View {
             if showOnboarding {
                 OnboardingOverlay(isPresented: $showOnboarding)
             }
+            
+            // Read Aloud Control Pill - Level with Clarify button
+            if readAloudManager.isVisible {
+                VStack {
+                    Spacer()
+                    HStack {
+                        ReadAloudControlPill()
+                            .padding(.leading, 20) // Shifted slightly left from 26 to 20
+                        Spacer()
+                        // Spacer to align with Clarify button position
+                        Color.clear
+                            .frame(width: 70, height: 70) // Same size as Clarify button
+                            .padding(.trailing, 26)
+                    }
+                    .padding(.bottom, 35) // Same bottom padding as Clarify button
+                }
+                .transition(.asymmetric(
+                    insertion: .scale(scale: 0.8).combined(with: .opacity).combined(with: .move(edge: .leading)),
+                    removal: .scale(scale: 0.9).combined(with: .opacity).combined(with: .move(edge: .leading))
+                ))
+                .animation(.spring(response: 0.5, dampingFraction: 0.7), value: readAloudManager.isVisible)
+            }
         }
         .sheet(isPresented: $showAIChat) {
             AIChatView(
@@ -246,7 +269,7 @@ struct ArticleDetailView: View {
         ZStack {
             // Background overlay (separate animation)
             if showFontCustomization {
-                Color.black.opacity(0.4)
+                Color.themeBlack.opacity(0.4)
                     .ignoresSafeArea()
                     .onTapGesture {
                         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
@@ -365,7 +388,7 @@ struct ArticleDetailView: View {
         ZStack {
             // Background overlay (separate animation)
             if showReadingTools {
-                Color.black.opacity(0.4)
+                Color.themeBlack.opacity(0.4)
                     .ignoresSafeArea()
                     .onTapGesture {
                         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
@@ -484,11 +507,11 @@ struct ArticleDetailView: View {
                             toggleReadAloud()
                         } label: {
                             HStack {
-                                Image(systemName: isReadingAloud ? "pause.circle.fill" : "play.circle.fill")
+                                Image(systemName: readAloudManager.isReading ? "pause.circle.fill" : "play.circle.fill")
                                     .font(.system(size: 20, weight: .medium))
                                     .foregroundColor(colorScheme == .dark ? Color.themeBlack : Color.themeWhiteDark)
                                 
-                                Text(isReadingAloud ? "Pause Reading" : "Read Aloud")
+                                Text(readAloudManager.isReading ? "Pause Reading" : "Read Aloud")
                                     .font(.system(size: 16, weight: .semibold))
                                     .foregroundColor(colorScheme == .dark ? Color.themeBlack : Color.themeWhiteDark)
                                 
@@ -513,22 +536,46 @@ struct ArticleDetailView: View {
     }
     
     private func toggleReadAloud() {
-        isReadingAloud.toggle()
-        if isReadingAloud {
-            startReadingAloud()
+        if readAloudManager.isReading {
+            readAloudManager.pauseReading()
+        } else if readAloudManager.synthesizer.isPaused {
+            readAloudManager.resumeReading()
         } else {
-            stopReadingAloud()
+            startReadingAloud()
         }
     }
     
     private func startReadingAloud() {
-        // TODO: Implement text-to-speech functionality
-        print("Starting read aloud...")
+        let articleText = extractArticleText()
+        readAloudManager.startReading(text: articleText)
     }
     
-    private func stopReadingAloud() {
-        // TODO: Stop text-to-speech
-        print("Stopping read aloud...")
+    private func extractArticleText() -> String {
+        return article.content.compactMap { contentItem in
+            switch contentItem {
+            case .paragraph(let text):
+                return text
+            case .heading(let text, _):
+                return text
+            case .quote(let text, _):
+                return text
+            case .image(_, let caption, _):
+                return caption
+            case .list(let items, _):
+                return items.joined(separator: ". ")
+            case .richParagraph(let segments):
+                return segments.map { segment in
+                    switch segment {
+                    case .text(let text), .boldText(let text), .italicText(let text):
+                        return text
+                    case .link(let text, _):
+                        return text
+                    }
+                }.joined(separator: " ")
+            default:
+                return nil
+            }
+        }.joined(separator: ". ")
     }
     
     private var headerView: some View {
@@ -547,11 +594,11 @@ struct ArticleDetailView: View {
                         } placeholder: {
                             // Fallback to colored circle with first letter
                             Circle()
-                                .fill(Color.blue.opacity(0.2))
+                                .fill((colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack).opacity(0.2))
                                 .overlay(
                                     Text(String(sourceName.prefix(1)))
                                         .font(.system(size: 10, weight: .semibold, design: .default))
-                                        .foregroundColor(.blue)
+                                        .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                                 )
                         }
                         .frame(width: 20, height: 20)
@@ -566,9 +613,9 @@ struct ArticleDetailView: View {
                 .padding(.bottom, 8)
             }
             
-            // Article title (centered, serif font)
+            // Article title (centered, condensed serif font)
             Text(article.title)
-                .font(.system(size: 32, weight: .bold, design: .serif))
+                .font(.system(size: 32, weight: .bold, design: .serif).width(.condensed))
                 .lineSpacing(6)
                 .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                 .multilineTextAlignment(.center)
@@ -605,7 +652,7 @@ struct ArticleDetailView: View {
             if readingProgress > 0 {
                 VStack(spacing: 8) {
                     ProgressView(value: readingProgress)
-                        .progressViewStyle(LinearProgressViewStyle(tint: .blue))
+                        .progressViewStyle(LinearProgressViewStyle(tint: colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack))
                         .frame(maxWidth: 200)
                         .scaleEffect(y: 0.8)
                 }
@@ -740,14 +787,34 @@ struct ArticleDetailView: View {
     
     private func paragraphView(text: String) -> some View {
         Group {
-            if bionicReadingEnabled {
+            if readAloudManager.isReading {
+                // Add subtle background when reading to indicate active paragraph
+                Group {
+                    if bionicReadingEnabled {
+                        bionicText(text)
+                            .lineSpacing(lineSpacing)
+                    } else {
+                        Text(text)
+                            .font(customFont)
+                            .lineSpacing(lineSpacing)
+                            .foregroundColor(colorScheme == .dark ? Color.white.opacity(0.9) : Color.black.opacity(0.9))
+                    }
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color.blue.opacity(0.08))
+                        .animation(.easeInOut(duration: 0.3), value: readAloudManager.currentWordRange)
+                )
+            } else if bionicReadingEnabled {
                 bionicText(text)
                     .lineSpacing(lineSpacing)
             } else {
                 Text(text)
                     .font(customFont)
                     .lineSpacing(lineSpacing)
-                    .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
+                    .foregroundColor(colorScheme == .dark ? Color.white.opacity(0.9) : Color.black.opacity(0.9))
             }
         }
         .padding(.bottom, 12)
@@ -910,7 +977,7 @@ struct ArticleDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Image(systemName: "logo.twitter")
-                    .foregroundColor(.blue)
+                    .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                 Text("Twitter")
                     .font(.system(size: 14, weight: .medium, design: .serif))
                     .foregroundColor(.secondary)

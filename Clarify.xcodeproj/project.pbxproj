@@ -12,6 +12,7 @@
 		0F00A826D717FBF2D7E8720E /* ArticleParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66863333FB4530765D548E0A /* ArticleParser.swift */; };
 		36F3A542E4412005A3B1F5D9 /* ArticleDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C796C0758BC0986BAFCE2117 /* ArticleDetailView.swift */; };
 		7D1C10E1AF7EB70E57CF879E /* Color+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE7599C10EF81C3CDB6ADFF9 /* Color+Extensions.swift */; };
+		A22F58CC2EE29ED70099DC4C /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A22F58C82EE29ED70099DC4C /* GoogleService-Info.plist */; };
 		A27969DE2E8F0B07004FC06D /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A27969DB2E8F0B07004FC06D /* Extensions.swift */; };
 		A27969E02E8F0B07004FC06D /* SimpleAIChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A27969DC2E8F0B07004FC06D /* SimpleAIChatView.swift */; };
 		A27C2538E47351780E86D55A /* ArticleGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B70CCC7CB280229172C80FAE /* ArticleGridView.swift */; };
@@ -23,20 +24,26 @@
 		B2B508BB5AD8E99D0F134057 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AD37CB9476AF4DAAE3E3D766 /* LaunchScreen.storyboard */; };
 		B3252A33AB5E8DA2DA3A8702 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0F8344B9C5986128B3EE939 /* SettingsView.swift */; };
 		BAE30EAD17D091710F44A696 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 8D220DFEAE4DB6E9127D05C2 /* SwiftSoup */; };
+		D2E1A6F32C9F4A8E00123456 /* ReadAloudManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2E1A6F42C9F4A8E00123456 /* ReadAloudManager.swift */; };
+		D2E1A6F52C9F4A8E00123456 /* ReadAloudControlPill.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2E1A6F62C9F4A8E00123456 /* ReadAloudControlPill.swift */; };
+		D2E1A6F92C9F4A8E00123456 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2E1A6FA2C9F4A8E00123456 /* LoginView.swift */; };
 		DF84360F1A07C20B4A93290F /* ClarifyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9D98D3841F816E43C9A1FE3 /* ClarifyApp.swift */; };
-		F45B1F938EC7417851B331ED /* Article.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60943A40DA07E15A37F2727C /* Article.swift */; };
 		E0E0E0E02EFFFF0000000001 /* EnvironmentConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E0E0E02EFFFF0000000000 /* EnvironmentConfig.swift */; };
 		E0E0E0E02EFFFF0000000002 /* HapticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E0E0E02EFFFF0000000003 /* HapticsManager.swift */; };
 		E0E0E0E02EFFFF0000000004 /* AISummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E0E0E02EFFFF0000000005 /* AISummaryView.swift */; };
 		E0E0E0E02EFFFF0000000006 /* ContinueReadingCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E0E0E02EFFFF0000000007 /* ContinueReadingCard.swift */; };
 		E0E0E0E02EFFFF0000000008 /* OnboardingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E0E0E02EFFFF0000000009 /* OnboardingOverlay.swift */; };
-		/* End PBXBuildFile section */
+		E0E0E0E02EFFFF0000000010 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E0E0E02EFFFF0000000011 /* Typography.swift */; };
+		E0E0E0E02EFFFF0000000012 /* Font+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E0E0E02EFFFF0000000013 /* Font+Extensions.swift */; };
+		F45B1F938EC7417851B331ED /* Article.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60943A40DA07E15A37F2727C /* Article.swift */; };
+/* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		60943A40DA07E15A37F2727C /* Article.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Article.swift; sourceTree = "<group>"; };
 		66863333FB4530765D548E0A /* ArticleParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArticleParser.swift; sourceTree = "<group>"; };
 		7D1F743BA7380FB4ED1DE874 /* Clarify.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Clarify.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		97593DFC4857773EFDB8D58B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A22F58C82EE29ED70099DC4C /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		A26264132E8EE7B3008E511D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		A27969DB2E8F0B07004FC06D /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		A27969DC2E8F0B07004FC06D /* SimpleAIChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleAIChatView.swift; sourceTree = "<group>"; };
@@ -51,13 +58,18 @@
 		C0F8344B9C5986128B3EE939 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		C796C0758BC0986BAFCE2117 /* ArticleDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArticleDetailView.swift; sourceTree = "<group>"; };
 		D0BC3E71BB62E9C683F22207 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		D2E1A6F42C9F4A8E00123456 /* ReadAloudManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadAloudManager.swift; sourceTree = "<group>"; };
+		D2E1A6F62C9F4A8E00123456 /* ReadAloudControlPill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadAloudControlPill.swift; sourceTree = "<group>"; };
+		D2E1A6FA2C9F4A8E00123456 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		D9D98D3841F816E43C9A1FE3 /* ClarifyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClarifyApp.swift; sourceTree = "<group>"; };
 		E0E0E0E02EFFFF0000000000 /* EnvironmentConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentConfig.swift; sourceTree = "<group>"; };
 		E0E0E0E02EFFFF0000000003 /* HapticsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsManager.swift; sourceTree = "<group>"; };
 		E0E0E0E02EFFFF0000000005 /* AISummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AISummaryView.swift; sourceTree = "<group>"; };
 		E0E0E0E02EFFFF0000000007 /* ContinueReadingCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinueReadingCard.swift; sourceTree = "<group>"; };
 		E0E0E0E02EFFFF0000000009 /* OnboardingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingOverlay.swift; sourceTree = "<group>"; };
-		/* End PBXFileReference section */
+		E0E0E0E02EFFFF0000000011 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
+		E0E0E0E02EFFFF0000000013 /* Font+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Font+Extensions.swift"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		B9D2EABBB55CA3A0D0E6465F /* Frameworks */ = {
@@ -82,6 +94,7 @@
 		24F43F675D786A8810F3F67C /* Clarify */ = {
 			isa = PBXGroup;
 			children = (
+				A22F58C82EE29ED70099DC4C /* GoogleService-Info.plist */,
 				A2E02D4F2E8F69500078B852 /* ArticleDataManager.swift */,
 				A2E02D4D2E8F66F50078B852 /* PDFViewerView.swift */,
 				A2E02D4B2E8F27FE0078B852 /* OpenAIService.swift */,
@@ -104,6 +117,11 @@
 				E0E0E0E02EFFFF0000000005 /* AISummaryView.swift */,
 				E0E0E0E02EFFFF0000000007 /* ContinueReadingCard.swift */,
 				E0E0E0E02EFFFF0000000009 /* OnboardingOverlay.swift */,
+				E0E0E0E02EFFFF0000000011 /* Typography.swift */,
+				E0E0E0E02EFFFF0000000013 /* Font+Extensions.swift */,
+				D2E1A6F42C9F4A8E00123456 /* ReadAloudManager.swift */,
+				D2E1A6F62C9F4A8E00123456 /* ReadAloudControlPill.swift */,
+				D2E1A6FA2C9F4A8E00123456 /* LoginView.swift */,
 			);
 			path = Clarify;
 			sourceTree = "<group>";
@@ -169,6 +187,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				FFA90944792A2837F9A92FDC /* XCRemoteSwiftPackageReference "SwiftSoup" */,
+				A22F58C42EE29CED0099DC4C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			projectDirPath = "";
 			projectRoot = "";
@@ -184,6 +203,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				099F5FDFFEE5EDA06CCC65EF /* Assets.xcassets in Resources */,
+				A22F58CC2EE29ED70099DC4C /* GoogleService-Info.plist in Resources */,
 				B2B508BB5AD8E99D0F134057 /* LaunchScreen.storyboard in Resources */,
 				A2FA7B352E936281004CBFC6 /* Clarify App Icon.icon in Resources */,
 			);
@@ -215,6 +235,11 @@
 				E0E0E0E02EFFFF0000000004 /* AISummaryView.swift in Sources */,
 				E0E0E0E02EFFFF0000000006 /* ContinueReadingCard.swift in Sources */,
 				E0E0E0E02EFFFF0000000008 /* OnboardingOverlay.swift in Sources */,
+				E0E0E0E02EFFFF0000000010 /* Typography.swift in Sources */,
+				E0E0E0E02EFFFF0000000012 /* Font+Extensions.swift in Sources */,
+				D2E1A6F32C9F4A8E00123456 /* ReadAloudManager.swift in Sources */,
+				D2E1A6F52C9F4A8E00123456 /* ReadAloudControlPill.swift in Sources */,
+				D2E1A6F92C9F4A8E00123456 /* LoginView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -402,6 +427,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		A22F58C42EE29CED0099DC4C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.6.0;
+			};
+		};
 		FFA90944792A2837F9A92FDC /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";

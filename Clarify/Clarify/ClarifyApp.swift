@@ -1,16 +1,26 @@
 import SwiftUI
+// Firebase will be activated once SDK is properly added
+// import FirebaseCore
 
 @main
 struct ClarifyApp: App {
     @AppStorage("appearance") private var appearance: Appearance = .system
+    @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
+    // Will be activated once Firebase SDK is added:
+    // @StateObject private var userManager = FirebaseUserManager.shared
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .preferredColorScheme(getPreferredColorScheme())
-                .onOpenURL { url in
-                    handleIncomingURL(url)
-                }
+            if isLoggedIn {
+                ContentView()
+                    .preferredColorScheme(getPreferredColorScheme())
+                    .onOpenURL { url in
+                        handleIncomingURL(url)
+                    }
+            } else {
+                LoginView()
+                    .preferredColorScheme(getPreferredColorScheme())
+            }
         }
     }
     

@@ -97,7 +97,7 @@ struct AIChatView: View {
                 HStack {
                     Text("Clarify AI")
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.primary)
+                        .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                     
                     Spacer()
                     
@@ -106,7 +106,7 @@ struct AIChatView: View {
                     }) {
                         Image(systemName: "square.and.pencil")
                             .font(.system(size: 20, weight: .medium))
-                            .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+                            .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                     }
                     .frame(width: 40, height: 40)
                 }
@@ -126,7 +126,7 @@ struct AIChatView: View {
             // Greeting
             Text("How can I help you today?")
                 .font(.system(size: 24, weight: .semibold))
-                .foregroundColor(.primary)
+                .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                 .multilineTextAlignment(.center)
             
             // Conversation starters
@@ -163,12 +163,12 @@ struct AIChatView: View {
             HStack(spacing: 12) {
                 Image(systemName: icon)
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.primary)
+                    .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                     .frame(width: 20)
                 
                 Text(title)
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.primary)
+                    .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                 
                 Spacer()
             }

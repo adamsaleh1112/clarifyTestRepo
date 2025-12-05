@@ -14,11 +14,11 @@ struct AISummaryView: View {
                     HStack {
                         Image(systemName: "brain.head.profile")
                             .font(.system(size: 20, weight: .medium))
-                            .foregroundColor(.blue)
+                            .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                         
                         Text("AI Summary")
                             .font(.system(size: 24, weight: .bold))
-                            .foregroundColor(.primary)
+                            .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                         
                         Spacer()
                         
@@ -26,7 +26,7 @@ struct AISummaryView: View {
                             onDismiss()
                         }
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.blue)
+                        .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                     }
                     
                     Text(title)
@@ -43,7 +43,7 @@ struct AISummaryView: View {
                         Text(summary)
                             .font(.system(size: 17, weight: .regular, design: .serif))
                             .lineSpacing(6)
-                            .foregroundColor(.primary)
+                            .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                         
                         Spacer(minLength: 20)
                         
