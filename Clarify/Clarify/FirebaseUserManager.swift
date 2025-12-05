@@ -156,11 +156,51 @@ class FirebaseUserManager: ObservableObject {
     @MainActor
     func logout() async {
         do {
+            // 1. Sign out from Firebase
             try auth.signOut()
-            // State will be updated automatically by the auth state listener
+            
+            // 2. Clear current user data immediately
+            self.currentUser = nil
+            self.isLoggedIn = false
+            self.isLoading = false
+            
+            // 3. Clear any Firebase-specific cached data
+            clearFirebaseCache()
+            
+            print("✅ Firebase logout successful")
+            
         } catch {
-            print("Error signing out: \(error.localizedDescription)")
+            print("❌ Error signing out from Firebase: \(error.localizedDescription)")
+            
+            // Even if Firebase logout fails, clear local state for security
+            self.currentUser = nil
+            self.isLoggedIn = false
+            self.isLoading = false
         }
+    }
+    
+    // MARK: - Firebase Cache Cleanup
+    private func clearFirebaseCache() {
+        // Clear any Firebase-specific UserDefaults
+        let firebaseKeys = [
+            "firebase_auth_token",
+            "firebase_refresh_token", 
+            "firebase_user_cache",
+            "firebase_id_token",
+            "firebase_access_token"
+        ]
+        
+        for key in firebaseKeys {
+            UserDefaults.standard.removeObject(forKey: key)
+        }
+        
+        // Clear Firestore cache if needed
+        // Note: Firestore automatically manages its cache, but we can clear settings
+        UserDefaults.standard.removeObject(forKey: "firestore_cache_settings")
+        
+        UserDefaults.standard.synchronize()
+        
+        print("🧹 Firebase cache cleared")
     }
     
     // MARK: - Password Reset
