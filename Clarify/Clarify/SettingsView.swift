@@ -4,6 +4,7 @@ struct SettingsView: View {
     @AppStorage("appearance") private var appearance: Appearance = .system
     @AppStorage("typography") private var typography: Typography = .modern
     @StateObject private var userManager = FirebaseUserManager.shared
+    @StateObject private var articleDataManager = ArticleDataManager()
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.presentationMode) var presentationMode
     @State private var isLoggingOut = false
@@ -199,32 +200,62 @@ struct SettingsView: View {
             // 1. Firebase logout
             await userManager.logout()
             
-            // 2. Clear all AppStorage data
+            // 2. Clear all article data (most important for account switching)
+            clearArticleData()
+            
+            // 3. Clear all AppStorage data
             clearAppStorageData()
             
-            // 3. Clear UserDefaults
+            // 4. Clear UserDefaults
             clearUserDefaults()
             
-            // 4. Clear any cached data
+            // 5. Clear any cached data
             clearCachedData()
             
-            // 5. Clear memory references
+            // 6. Clear memory references
             clearMemoryReferences()
             
             isLoggingOut = false
             
-            print("🔐 Complete logout: Firebase session ended, all local data cleared")
+            print("🔐 Complete logout: Firebase session ended, all local data cleared, ready for new account")
         }
     }
     
     // MARK: - Security Cleanup Functions
+    private func clearArticleData() {
+        // Clear all articles from the current account
+        articleDataManager.clearAllArticles()
+        
+        // Also clear any article-related UserDefaults keys
+        UserDefaults.standard.removeObject(forKey: "SavedArticles")
+        UserDefaults.standard.removeObject(forKey: "ArticleReadingProgress")
+        UserDefaults.standard.removeObject(forKey: "ArticleFavorites")
+        UserDefaults.standard.removeObject(forKey: "ArticleBookmarks")
+        UserDefaults.standard.removeObject(forKey: "ArticleNotes")
+        UserDefaults.standard.removeObject(forKey: "ArticleHighlights")
+        
+        print("🗑️ All article data cleared for account switch")
+    }
+    
     private func clearAppStorageData() {
         // Clear any user-specific AppStorage keys
         UserDefaults.standard.removeObject(forKey: "userEmail")
         UserDefaults.standard.removeObject(forKey: "userName")
         UserDefaults.standard.removeObject(forKey: "lastLoginDate")
         UserDefaults.standard.removeObject(forKey: "userPreferences")
+        
+        // Clear onboarding state so new user sees onboarding
         UserDefaults.standard.removeObject(forKey: "hasCompletedOnboarding")
+        UserDefaults.standard.removeObject(forKey: "hasSeenOnboarding")
+        UserDefaults.standard.removeObject(forKey: "onboardingCompleted")
+        
+        // Clear reading preferences that might be user-specific
+        UserDefaults.standard.removeObject(forKey: "readingSpeed")
+        UserDefaults.standard.removeObject(forKey: "lastReadArticle")
+        UserDefaults.standard.removeObject(forKey: "readingGoals")
+        UserDefaults.standard.removeObject(forKey: "readingStats")
+        
+        print("🧹 User-specific AppStorage data cleared")
     }
     
     private func clearUserDefaults() {
@@ -254,7 +285,13 @@ struct SettingsView: View {
             let userDataPaths = [
                 documentsPath.appendingPathComponent("user_data.json"),
                 documentsPath.appendingPathComponent("cached_articles.json"),
-                documentsPath.appendingPathComponent("user_preferences.plist")
+                documentsPath.appendingPathComponent("user_preferences.plist"),
+                documentsPath.appendingPathComponent("article_cache.json"),
+                documentsPath.appendingPathComponent("reading_progress.json"),
+                documentsPath.appendingPathComponent("favorites.json"),
+                documentsPath.appendingPathComponent("bookmarks.json"),
+                documentsPath.appendingPathComponent("annotations.json"),
+                documentsPath.appendingPathComponent("highlights.json")
             ]
             
             for path in userDataPaths {
