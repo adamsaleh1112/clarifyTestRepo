@@ -36,6 +36,7 @@
 		E0E0E0E02EFFFF0000000010 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E0E0E02EFFFF0000000011 /* Typography.swift */; };
 		E0E0E0E02EFFFF0000000012 /* Font+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E0E0E02EFFFF0000000013 /* Font+Extensions.swift */; };
 		F45B1F938EC7417851B331ED /* Article.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60943A40DA07E15A37F2727C /* Article.swift */; };
+		A22F58CD2EE29ED70099DC4C /* FirebaseUserManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A22F58C92EE29ED70099DC4C /* FirebaseUserManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -69,6 +70,7 @@
 		E0E0E0E02EFFFF0000000009 /* OnboardingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingOverlay.swift; sourceTree = "<group>"; };
 		E0E0E0E02EFFFF0000000011 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
 		E0E0E0E02EFFFF0000000013 /* Font+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Font+Extensions.swift"; sourceTree = "<group>"; };
+		A22F58C92EE29ED70099DC4C /* FirebaseUserManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseUserManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -122,6 +124,7 @@
 				D2E1A6F42C9F4A8E00123456 /* ReadAloudManager.swift */,
 				D2E1A6F62C9F4A8E00123456 /* ReadAloudControlPill.swift */,
 				D2E1A6FA2C9F4A8E00123456 /* LoginView.swift */,
+				A22F58C92EE29ED70099DC4C /* FirebaseUserManager.swift */,
 			);
 			path = Clarify;
 			sourceTree = "<group>";
@@ -161,6 +164,9 @@
 			name = Clarify;
 			packageProductDependencies = (
 				8D220DFEAE4DB6E9127D05C2 /* SwiftSoup */,
+				A22F58C52EE29CED0099DC4C /* FirebaseAuth */,
+				A22F58C62EE29CED0099DC4C /* FirebaseCore */,
+				A22F58C72EE29CED0099DC4C /* FirebaseFirestore */,
 			);
 			productName = Clarify;
 			productReference = 7D1F743BA7380FB4ED1DE874 /* Clarify.app */;
@@ -240,6 +246,7 @@
 				D2E1A6F32C9F4A8E00123456 /* ReadAloudManager.swift in Sources */,
 				D2E1A6F52C9F4A8E00123456 /* ReadAloudControlPill.swift in Sources */,
 				D2E1A6F92C9F4A8E00123456 /* LoginView.swift in Sources */,
+				A22F58CD2EE29ED70099DC4C /* FirebaseUserManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -450,6 +457,21 @@
 			isa = XCSwiftPackageProductDependency;
 			package = FFA90944792A2837F9A92FDC /* XCRemoteSwiftPackageReference "SwiftSoup" */;
 			productName = SwiftSoup;
+		};
+		A22F58C52EE29CED0099DC4C /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A22F58C42EE29CED0099DC4C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		A22F58C62EE29CED0099DC4C /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A22F58C42EE29CED0099DC4C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		A22F58C72EE29CED0099DC4C /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A22F58C42EE29CED0099DC4C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

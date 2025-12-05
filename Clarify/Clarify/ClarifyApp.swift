@@ -1,17 +1,24 @@
 import SwiftUI
-// Firebase will be activated once SDK is properly added
-// import FirebaseCore
+import FirebaseCore
+
+// Firebase App Delegate
+class FirebaseAppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        FirebaseApp.configure()
+        return true
+    }
+}
 
 @main
 struct ClarifyApp: App {
+    @UIApplicationDelegateAdaptor(FirebaseAppDelegate.self) var delegate
     @AppStorage("appearance") private var appearance: Appearance = .system
-    @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
-    // Will be activated once Firebase SDK is added:
-    // @StateObject private var userManager = FirebaseUserManager.shared
+    @StateObject private var userManager = FirebaseUserManager.shared
 
     var body: some Scene {
         WindowGroup {
-            if isLoggedIn {
+            if userManager.isLoggedIn {
                 ContentView()
                     .preferredColorScheme(getPreferredColorScheme())
                     .onOpenURL { url in

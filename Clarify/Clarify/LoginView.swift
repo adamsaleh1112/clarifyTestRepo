@@ -2,13 +2,11 @@ import SwiftUI
 
 struct LoginView: View {
     @Environment(\.colorScheme) var colorScheme
-    // TODO: Uncomment after adding Firebase SDK:
-    // @StateObject private var userManager = FirebaseUserManager.shared
+    @StateObject private var userManager = FirebaseUserManager.shared
     @State private var email = ""
     @State private var password = ""
     @State private var isShowingSignUp = false
     @State private var isLoading = false
-    @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
     @State private var animationOffset: CGFloat = 0
     @State private var errorMessage = ""
     @State private var showError = false
@@ -22,29 +20,7 @@ struct LoginView: View {
             VStack(spacing: 0) {
                 Spacer()
                 
-                // Bypass button for testing
-                HStack {
-                    Spacer()
-                    Button(action: {
-                        isLoggedIn = true
-                    }) {
-                        Text("Skip Login")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(colorScheme == .dark ? Color(hex: "ECE3DF") : Color(hex: "312D2B"))
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(colorScheme == .dark ? Color(hex: "2C2928") : Color(hex: "F0ECEA"))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(colorScheme == .dark ? Color(hex: "494544") : Color(hex: "B8B4B0"), lineWidth: 1)
-                                    )
-                            )
-                    }
-                }
-                .padding(.horizontal, 24)
-                .padding(.top, 20)
+                Spacer(minLength: 60)
                 
                 Spacer()
                 
@@ -220,33 +196,23 @@ struct LoginView: View {
     }
     
     private func loginUser() {
-        isLoading = true
-        showError = false
-        
-        // Basic validation
-        if email.isEmpty {
-            errorMessage = "Email cannot be empty"
-            showError = true
+        Task {
+            isLoading = true
+            showError = false
+            
+            let result = await userManager.loginUser(email: email, password: password)
+            
+            switch result {
+            case .success:
+                // Login successful, Firebase handles state automatically
+                print("✅ Firebase login successful with email: \(email)")
+            case .failure(let error):
+                errorMessage = error.message
+                showError = true
+            }
+            
             isLoading = false
-            return
         }
-        
-        if password.isEmpty {
-            errorMessage = "Password cannot be empty"
-            showError = true
-            isLoading = false
-            return
-        }
-        
-        // Demo login - will be replaced with Firebase
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            isLoading = false
-            isLoggedIn = true
-            print("Demo login successful with email: \(email)")
-        }
-        
-        // TODO: Replace with Firebase authentication:
-        // let result = await userManager.loginUser(email: email, password: password)
     }
 }
 
@@ -273,8 +239,7 @@ struct ClarifyTextFieldStyle: TextFieldStyle {
 struct SignUpView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) var colorScheme
-    // TODO: Uncomment after adding Firebase SDK:
-    // @StateObject private var userManager = FirebaseUserManager.shared
+    @StateObject private var userManager = FirebaseUserManager.shared
     @State private var email = ""
     @State private var password = ""
     @State private var confirmPassword = ""
@@ -420,40 +385,29 @@ struct SignUpView: View {
     }
     
     private func registerUser() {
-        isLoading = true
-        showError = false
-        
-        // Basic validation
-        if email.isEmpty {
-            errorMessage = "Email cannot be empty"
-            showError = true
+        Task {
+            isLoading = true
+            showError = false
+            
+            let result = await userManager.registerUser(
+                email: email,
+                password: password,
+                confirmPassword: confirmPassword,
+                displayName: nil
+            )
+            
+            switch result {
+            case .success:
+                // Registration successful, user is automatically logged in
+                print("✅ Firebase registration successful with email: \(email)")
+                dismiss()
+            case .failure(let error):
+                errorMessage = error.message
+                showError = true
+            }
+            
             isLoading = false
-            return
         }
-        
-        if password.isEmpty {
-            errorMessage = "Password cannot be empty"
-            showError = true
-            isLoading = false
-            return
-        }
-        
-        if password != confirmPassword {
-            errorMessage = "Passwords do not match"
-            showError = true
-            isLoading = false
-            return
-        }
-        
-        // Demo registration - will be replaced with Firebase
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            isLoading = false
-            dismiss()
-            print("Demo registration successful with email: \(email)")
-        }
-        
-        // TODO: Replace with Firebase registration:
-        // let result = await userManager.registerUser(...)
     }
 }
 
