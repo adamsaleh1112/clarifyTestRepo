@@ -6,30 +6,47 @@ import FirebaseAuth
 struct CloudArticle: Codable {
     let id: String
     let title: String
-    let content: String
-    let url: String?
-    let createdAt: Date
+    let date: String
+    let coverImageURL: String?
+    let content: Data // Encoded [ArticleContent]
+    let inlineImages: [String]?
+    let sourceName: String?
+    let sourceLogoURL: String?
+    let pdfURL: String?
+    let pdfTextContent: String?
     let updatedAt: Date
     let readingProgress: Double
     let isFavorite: Bool
     let lastReadDate: Date?
     let aiSummary: String?
-    let estimatedReadingTimeMinutes: Int
+    let estimatedReadingTimeMinutes: Int?
     
     // Convert to local Article model
-    func toArticle() -> Article {
-        return Article(
-            id: UUID(uuidString: id) ?? UUID(),
+    func toArticle() -> Article? {
+        guard let articleContent = try? JSONDecoder().decode([ArticleContent].self, from: content) else {
+            return nil
+        }
+        
+        var article = Article(
             title: title,
-            content: content,
-            url: url,
-            createdAt: createdAt,
-            readingProgress: readingProgress,
-            isFavorite: isFavorite,
-            lastReadDate: lastReadDate,
-            aiSummary: aiSummary,
-            estimatedReadingTimeMinutes: estimatedReadingTimeMinutes
+            date: date,
+            coverImageURL: coverImageURL != nil ? URL(string: coverImageURL!) : nil,
+            content: articleContent,
+            inlineImages: inlineImages,
+            sourceName: sourceName,
+            sourceLogoURL: sourceLogoURL != nil ? URL(string: sourceLogoURL!) : nil,
+            pdfURL: pdfURL != nil ? URL(string: pdfURL!) : nil,
+            pdfTextContent: pdfTextContent
         )
+        
+        // Manually set the metadata fields that aren't in the constructor
+        article.isFavorite = isFavorite
+        article.readingProgress = readingProgress
+        article.lastReadDate = lastReadDate
+        article.estimatedReadingTimeMinutes = estimatedReadingTimeMinutes
+        article.aiSummary = aiSummary
+        
+        return article
     }
 }
 
@@ -73,12 +90,22 @@ class CloudArticleManager: ObservableObject {
             return .failure(.notAuthenticated)
         }
         
+        // Encode article content to Data
+        guard let contentData = try? JSONEncoder().encode(article.content) else {
+            return .failure(.uploadFailed("Failed to encode article content"))
+        }
+        
         let cloudArticle = CloudArticle(
             id: article.id.uuidString,
             title: article.title,
-            content: article.content,
-            url: article.url,
-            createdAt: article.createdAt,
+            date: article.date,
+            coverImageURL: article.coverImageURL?.absoluteString,
+            content: contentData,
+            inlineImages: article.inlineImages,
+            sourceName: article.sourceName,
+            sourceLogoURL: article.sourceLogoURL?.absoluteString,
+            pdfURL: article.pdfURL?.absoluteString,
+            pdfTextContent: article.pdfTextContent,
             updatedAt: Date(),
             readingProgress: article.readingProgress,
             isFavorite: article.isFavorite,
@@ -125,7 +152,9 @@ class CloudArticleManager: ObservableObject {
             for document in snapshot.documents {
                 do {
                     let cloudArticle = try decoder.decode(CloudArticle.self, from: document.data())
-                    articles.append(cloudArticle.toArticle())
+                    if let article = cloudArticle.toArticle() {
+                        articles.append(article)
+                    }
                 } catch {
                     print("⚠️ Failed to decode article \(document.documentID): \(error)")
                 }
