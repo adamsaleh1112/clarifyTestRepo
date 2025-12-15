@@ -27,7 +27,7 @@ struct LoginView: View {
                 // App title
                 VStack(spacing: 8) {
                     Text("Clarify")
-                        .font(.system(size: 48, weight: .bold, design: .serif).width(.condensed))
+                        .font(.uiHeading(size: 48))
                         .foregroundColor(colorScheme == .dark ? Color(hex: "ECE3DF") : Color(hex: "312D2B"))
                 }
                 .padding(.bottom, 60)
@@ -37,7 +37,7 @@ struct LoginView: View {
                     // Email field
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Email")
-                            .font(.system(size: 14, weight: .medium))
+                            .font(.system(size: 14, weight: .medium, design: .default))
                             .foregroundColor(colorScheme == .dark ? Color(hex: "ECE3DF") : Color(hex: "312D2B"))
                         
                         TextField("Enter your email", text: $email)
@@ -47,7 +47,7 @@ struct LoginView: View {
                     // Password field
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Password")
-                            .font(.system(size: 14, weight: .medium))
+                            .font(.system(size: 14, weight: .medium, design: .default))
                             .foregroundColor(colorScheme == .dark ? Color(hex: "ECE3DF") : Color(hex: "312D2B"))
                         
                         SecureField("Enter your password", text: $password)
@@ -57,7 +57,7 @@ struct LoginView: View {
                     // Error message
                     if showError {
                         Text(errorMessage)
-                            .font(.system(size: 14, weight: .medium))
+                            .font(.system(size: 14, weight: .medium, design: .default))
                             .foregroundColor(.red)
                             .padding(.horizontal, 16)
                             .padding(.top, 8)
@@ -74,7 +74,7 @@ struct LoginView: View {
                                     .scaleEffect(0.8)
                             } else {
                                 Text("Sign In")
-                                    .font(.system(size: 16, weight: .semibold))
+                                    .font(.system(size: 16, weight: .semibold, design: .default))
                             }
                         }
                         .foregroundColor(colorScheme == .dark ? Color(hex: "312D2B") : Color(hex: "ECE3DF"))
@@ -96,7 +96,7 @@ struct LoginView: View {
                             .frame(height: 1)
                         
                         Text("or")
-                            .font(.system(size: 14, weight: .medium))
+                            .font(.system(size: 14, weight: .medium, design: .default))
                             .foregroundColor(colorScheme == .dark ? Color(hex: "8A827E") : Color(hex: "69605B"))
                             .padding(.horizontal, 16)
                         
@@ -111,7 +111,7 @@ struct LoginView: View {
                         isShowingSignUp = true
                     }) {
                         Text("Create Account")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.system(size: 16, weight: .medium, design: .default))
                             .foregroundColor(colorScheme == .dark ? Color(hex: "ECE3DF") : Color(hex: "312D2B"))
                             .frame(maxWidth: .infinity)
                             .frame(height: 50)
@@ -131,13 +131,13 @@ struct LoginView: View {
                         // Handle forgot password
                     }) {
                         Text("Forgot Password?")
-                            .font(.system(size: 14, weight: .medium))
+                            .font(.system(size: 14, weight: .medium, design: .default))
                             .foregroundColor(.white.opacity(0.8))
                             .underline()
                     }
                     
                     Text("© 2024 Clarify")
-                        .font(.system(size: 12, weight: .regular))
+                        .font(.system(size: 12, weight: .regular, design: .default))
                         .foregroundColor(.white.opacity(0.6))
                 }
                 .padding(.bottom, 40)
@@ -232,7 +232,7 @@ struct ClarifyTextFieldStyle: TextFieldStyle {
                     )
             )
             .foregroundColor(colorScheme == .dark ? Color(hex: "ECE3DF") : Color(hex: "312D2B"))
-            .font(.system(size: 16, weight: .regular))
+            .font(.system(size: 16, weight: .regular, design: .default))
     }
 }
 
@@ -300,7 +300,7 @@ struct SignUpView: View {
                 HStack {
                     Button(action: { dismiss() }) {
                         Image(systemName: "xmark")
-                            .font(.system(size: 18, weight: .medium))
+                            .font(.system(size: 18, weight: .medium, design: .default))
                             .foregroundColor(colorScheme == .dark ? Color(hex: "ECE3DF") : Color(hex: "312D2B"))
                             .frame(width: 32, height: 32)
                             .background(Circle().fill(colorScheme == .dark ? Color(hex: "2C2928") : Color(hex: "F0ECEA")))
@@ -315,11 +315,11 @@ struct SignUpView: View {
                 // Title
                 VStack(spacing: 8) {
                     Text("Create Account")
-                        .font(.system(size: 32, weight: .bold, design: .serif).width(.condensed))
+                        .font(.uiHeading(size: 32))
                         .foregroundColor(colorScheme == .dark ? Color(hex: "ECE3DF") : Color(hex: "312D2B"))
                     
                     Text("Join the Clarify community")
-                        .font(.system(size: 16, weight: .regular, design: .serif))
+                        .font(.system(size: 16, weight: .regular, design: .default))
                         .foregroundColor(colorScheme == .dark ? Color(hex: "8A827E") : Color(hex: "69605B"))
                 }
                 .padding(.bottom, 40)
@@ -328,7 +328,7 @@ struct SignUpView: View {
                 VStack(spacing: 20) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Email")
-                            .font(.system(size: 14, weight: .medium))
+                            .font(.system(size: 14, weight: .medium, design: .default))
                             .foregroundColor(colorScheme == .dark ? Color(hex: "ECE3DF") : Color(hex: "312D2B"))
                         
                         TextField("Enter your email", text: $email)
@@ -337,7 +337,7 @@ struct SignUpView: View {
                     
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Password")
-                            .font(.system(size: 14, weight: .medium))
+                            .font(.system(size: 14, weight: .medium, design: .default))
                             .foregroundColor(colorScheme == .dark ? Color(hex: "ECE3DF") : Color(hex: "312D2B"))
                         
                         SecureField("Create a password", text: $password)
@@ -346,7 +346,7 @@ struct SignUpView: View {
                     
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Confirm Password")
-                            .font(.system(size: 14, weight: .medium))
+                            .font(.system(size: 14, weight: .medium, design: .default))
                             .foregroundColor(colorScheme == .dark ? Color(hex: "ECE3DF") : Color(hex: "312D2B"))
                         
                         SecureField("Confirm your password", text: $confirmPassword)
@@ -356,7 +356,7 @@ struct SignUpView: View {
                     // Error message
                     if showError {
                         Text(errorMessage)
-                            .font(.system(size: 14, weight: .medium))
+                            .font(.system(size: 14, weight: .medium, design: .default))
                             .foregroundColor(.red)
                             .padding(.horizontal, 16)
                             .padding(.top, 8)
@@ -366,7 +366,7 @@ struct SignUpView: View {
                         registerUser()
                     }) {
                         Text("Create Account")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: 16, weight: .semibold, design: .default))
                             .foregroundColor(colorScheme == .dark ? Color(hex: "312D2B") : Color(hex: "ECE3DF"))
                             .frame(maxWidth: .infinity)
                             .frame(height: 50)

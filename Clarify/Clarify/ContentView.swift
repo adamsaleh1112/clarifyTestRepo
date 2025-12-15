@@ -16,7 +16,8 @@ struct ContentView: View {
     @State private var showFilePicker = false
     @State private var isProcessingSharedURL = false
     @State private var incomingURL: URL? = nil
-    @AppStorage("typography") private var typography: Typography = .modern
+    @State private var hasLoadedInitialData = false
+    // Typography selection removed - using fixed font hierarchy
     private let articleParser = ArticleParser()
     
     var filteredArticles: [Article] {
@@ -153,7 +154,7 @@ struct ContentView: View {
     private var headerSection: some View {
         HStack {
             Text("Library")
-                .font(.appTitle(typography: typography))
+                .font(.appTitle())
                 .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
             Spacer()
             
@@ -197,7 +198,7 @@ struct ContentView: View {
                     }
                 }) {
                     Text("Done")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.uiGeneric(size: 16, weight: .semibold))
                         .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
@@ -218,7 +219,7 @@ struct ContentView: View {
                             .foregroundColor(.secondary)
                         
                         TextField("Search articles...", text: $searchText)
-                            .font(.system(size: 16, weight: .medium, design: .rounded))
+                            .font(.uiGeneric(size: 16, weight: .medium))
                             .tint(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                             .accentColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                         
@@ -256,7 +257,7 @@ struct ContentView: View {
                         .font(.system(size: 50))
                         .foregroundColor(.gray)
                     Text("No articles found")
-                        .font(.system(size: 20.9, weight: .medium, design: .default))
+                        .font(.uiGeneric(size: 20.9, weight: .medium))
                         .foregroundColor(.gray)
                     Text("Try a different search term")
                         .foregroundColor(.secondary)
@@ -265,7 +266,7 @@ struct ContentView: View {
             } else if dataManager.articles.isEmpty {
                 Spacer()
                 Text("Library")
-                    .font(.system(size: 32.3, weight: .bold, design: .default))
+                    .font(.appTitle())
                     .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                     .opacity(0.5)
                 Spacer()
@@ -278,7 +279,7 @@ struct ContentView: View {
                             VStack(alignment: .leading, spacing: 16) {
                                 HStack {
                                     Text("Continue Reading")
-                                        .font(.appHeading(typography: typography))
+                                        .font(.appHeading())
                                         .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                                     
                                     Spacer()
@@ -308,7 +309,7 @@ struct ContentView: View {
                             VStack(alignment: .leading, spacing: 0) {
                                 HStack {
                                     Text("Favorites")
-                                        .font(.appHeading(typography: typography))
+                                        .font(.appHeading())
                                         .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                                     
                                     Spacer()
@@ -342,7 +343,7 @@ struct ContentView: View {
                             if !isSearching && (!dataManager.recentlyReadArticles.isEmpty || !dataManager.favoriteArticles.isEmpty) {
                                 HStack {
                                     Text("All Articles")
-                                        .font(.appHeading(typography: typography))
+                                        .font(.appHeading())
                                         .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                                     
                                     Spacer()
@@ -390,7 +391,7 @@ struct ContentView: View {
                         pasteAndParse()
                     }) {
                         Text("Paste URL from clipboard")
-                            .font(.system(size: 16.15, weight: .semibold, design: .default))
+                            .font(.uiGeneric(size: 16.15, weight: .semibold))
                             .foregroundColor(colorScheme == .dark ? Color.themeBlack : Color.themeWhiteDark)
                             .padding()
                             .frame(maxWidth: .infinity)
@@ -404,7 +405,7 @@ struct ContentView: View {
                         toggleOverlay()
                     }) {
                         Text("Upload PDF or TXT file")
-                            .font(.system(size: 16.15, weight: .semibold, design: .default))
+                            .font(.uiGeneric(size: 16.15, weight: .semibold))
                             .foregroundColor(colorScheme == .dark ? Color.themeBlack : Color.themeWhiteDark)
                             .padding()
                             .frame(maxWidth: .infinity)

@@ -12,9 +12,9 @@ struct ArticleDetailView: View {
     @State private var centeredBlockIndex: Int? = nil
     @State private var blockPositions: [Int: CGRect] = [:]
     @State private var showFontCustomization = false
-    @State private var selectedFont = "Source Serif Pro"
     @State private var fontSize: Double = 17.0
     @State private var lineSpacing: Double = 6.0
+    @State private var fontWeight: Double = 0.3 // 0.0 = ultraLight, 0.5 = regular, 1.0 = black
     @State private var showReadingTools = false
     @State private var centerStageEnabled = true
     @State private var tunnelVisionEnabled = false
@@ -55,6 +55,8 @@ struct ArticleDetailView: View {
                 .onAppear {
                     screenHeight = outerGeometry.size.height
                     checkForOnboarding()
+                    // Debug: Print available fonts
+                    Font.printAvailableFonts()
                 }
             }
             
@@ -234,34 +236,26 @@ struct ArticleDetailView: View {
         .navigationBarHidden(true)
     }
     
-    // MARK: - Font Customization
-    private var customFont: Font {
-        switch selectedFont {
-        case "Source Serif Pro":
-            return .system(size: fontSize, weight: .medium, design: .serif)
-        case "Times New Roman":
-            return .custom("Times New Roman", size: fontSize)
-        case "Georgia":
-            return .custom("Georgia", size: fontSize)
-        case "System Sans Serif":
-            return .system(size: fontSize, weight: .medium, design: .default)
-        default:
-            return .system(size: fontSize, weight: .medium, design: .serif)
-        }
+    // MARK: - Font Definitions
+    // Article text: Instrument Serif Regular with custom weight
+    private var articleTextFont: Font {
+        return .articleTextWithWeight(size: fontSize, weightValue: fontWeight)
     }
     
-    private func fontForButton(_ fontName: String) -> Font {
-        switch fontName {
-        case "Source Serif Pro":
-            return .system(size: 14, weight: .medium, design: .serif)
-        case "Times New Roman":
-            return .custom("Times New Roman", size: 14)
-        case "Georgia":
-            return .custom("Georgia", size: 14)
-        case "System Sans Serif":
-            return .system(size: 14, weight: .medium, design: .default)
-        default:
-            return .system(size: 14, weight: .medium)
+    // Article captions: Current serif font italic
+    private var articleCaptionFont: Font {
+        return .articleCaption()
+    }
+    
+    // Font weight label for UI display
+    private var fontWeightLabel: String {
+        switch fontWeight {
+        case 0.0...0.2: return "Ultra Light"
+        case 0.2...0.4: return "Light"
+        case 0.4...0.6: return "Regular"
+        case 0.6...0.8: return "Medium"
+        case 0.8...1.0: return "Bold"
+        default: return "Light"
         }
     }
     
@@ -286,7 +280,7 @@ struct ArticleDetailView: View {
                 // Header
                 HStack {
                     Text("Text Customization")
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.uiHeading(size: 20))
                         .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                     
                     Spacer()
@@ -305,49 +299,17 @@ struct ArticleDetailView: View {
                     }
                 }
                 
-                // Font Selection
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Font Family")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
-                    
-                    let fonts = ["Source Serif Pro", "Times New Roman", "Georgia", "System Sans Serif"]
-                    
-                    VStack(spacing: 8) {
-                        ForEach(fonts, id: \.self) { font in
-                            Button {
-                                selectedFont = font
-                            } label: {
-                                HStack {
-                                    Text(font)
-                                        .font(fontForButton(font))
-                                        .foregroundColor(selectedFont == font ? 
-                                                       (colorScheme == .dark ? Color.themeBlack : Color.themeWhiteDark) :
-                                                       (colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack))
-                                    Spacer()
-                                }
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 12)
-                                .background(selectedFont == font ? 
-                                          (colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack) :
-                                          (colorScheme == .dark ? Color.themeRaisedDark : Color.themeRaised))
-                                .cornerRadius(8)
-                            }
-                        }
-                    }
-                }
-                
                 // Font Size Slider
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
                         Text("Text Size")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.uiGeneric(size: 16, weight: .medium))
                             .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                         
                         Spacer()
                         
                         Text("\(Int(fontSize))pt")
-                            .font(.system(size: 14, weight: .medium))
+                            .font(.uiGeneric(size: 14, weight: .medium))
                             .foregroundColor(colorScheme == .dark ? Color.themeGreyDark : Color.themeGrey)
                     }
                     
@@ -359,17 +321,35 @@ struct ArticleDetailView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
                         Text("Line Spacing")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.uiGeneric(size: 16, weight: .medium))
                             .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                         
                         Spacer()
                         
                         Text("\(Int(lineSpacing))pt")
-                            .font(.system(size: 14, weight: .medium))
+                            .font(.uiGeneric(size: 14, weight: .medium))
                             .foregroundColor(colorScheme == .dark ? Color.themeGreyDark : Color.themeGrey)
                     }
                     
                     Slider(value: $lineSpacing, in: 2...16, step: 1)
+                        .accentColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
+                }
+                
+                // Font Weight Slider
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Text("Font Weight")
+                            .font(.uiGeneric(size: 16, weight: .medium))
+                            .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
+                        
+                        Spacer()
+                        
+                        Text(fontWeightLabel)
+                            .font(.uiGeneric(size: 14, weight: .medium))
+                            .foregroundColor(colorScheme == .dark ? Color.themeGreyDark : Color.themeGrey)
+                    }
+                    
+                    Slider(value: $fontWeight, in: 0.0...1.0, step: 0.1)
                         .accentColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                 }
                 }
@@ -405,7 +385,7 @@ struct ArticleDetailView: View {
                     // Header
                     HStack {
                         Text("Reading Tools")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(.uiHeading(size: 20))
                             .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                         
                         Spacer()
@@ -427,18 +407,18 @@ struct ArticleDetailView: View {
                     // Reading Features Toggles
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Reading Features")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.uiGeneric(size: 16, weight: .medium))
                             .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                         
                         // Center Stage Reading Toggle
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Center Stage Reading")
-                                    .font(.system(size: 14, weight: .medium))
+                                    .font(.uiGeneric(size: 14, weight: .medium))
                                     .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                                 
                                 Text("Scales text in focus for better readability")
-                                    .font(.system(size: 12, weight: .regular))
+                                    .font(.uiGeneric(size: 12, weight: .regular))
                                     .foregroundColor(colorScheme == .dark ? Color.themeGreyDark : Color.themeGrey)
                             }
                             
@@ -456,11 +436,11 @@ struct ArticleDetailView: View {
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Tunnel Vision Reading")
-                                    .font(.system(size: 14, weight: .medium))
+                                    .font(.uiGeneric(size: 14, weight: .medium))
                                     .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                                 
                                 Text("Blurs text that isn't in focus")
-                                    .font(.system(size: 12, weight: .regular))
+                                    .font(.uiGeneric(size: 12, weight: .regular))
                                     .foregroundColor(colorScheme == .dark ? Color.themeGreyDark : Color.themeGrey)
                             }
                             
@@ -478,11 +458,11 @@ struct ArticleDetailView: View {
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Bionic Reading")
-                                    .font(.system(size: 14, weight: .medium))
+                                    .font(.uiGeneric(size: 14, weight: .medium))
                                     .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                                 
                                 Text("Bolds the first half of each word")
-                                    .font(.system(size: 12, weight: .regular))
+                                    .font(.uiGeneric(size: 12, weight: .regular))
                                     .foregroundColor(colorScheme == .dark ? Color.themeGreyDark : Color.themeGrey)
                             }
                             
@@ -500,7 +480,7 @@ struct ArticleDetailView: View {
                     // Read Aloud Section
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Audio")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.uiGeneric(size: 16, weight: .medium))
                             .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                         
                         Button {
@@ -512,7 +492,7 @@ struct ArticleDetailView: View {
                                     .foregroundColor(colorScheme == .dark ? Color.themeBlack : Color.themeWhiteDark)
                                 
                                 Text(readAloudManager.isReading ? "Pause Reading" : "Read Aloud")
-                                    .font(.system(size: 16, weight: .semibold))
+                                    .font(.uiGeneric(size: 16, weight: .semibold))
                                     .foregroundColor(colorScheme == .dark ? Color.themeBlack : Color.themeWhiteDark)
                                 
                                 Spacer()
@@ -597,7 +577,7 @@ struct ArticleDetailView: View {
                                 .fill((colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack).opacity(0.2))
                                 .overlay(
                                     Text(String(sourceName.prefix(1)))
-                                        .font(.system(size: 10, weight: .semibold, design: .default))
+                                        .font(.uiGeneric(size: 10, weight: .semibold))
                                         .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                                 )
                         }
@@ -606,16 +586,16 @@ struct ArticleDetailView: View {
                     
                     // Source name
                     Text(sourceName.uppercased())
-                        .font(.system(size: 12, weight: .medium, design: .default))
+                        .font(.uiGeneric(size: 12, weight: .medium))
                         .foregroundColor(colorScheme == .dark ? Color.themeGreyDark : Color.themeGrey)
                         .tracking(0.5)
                 }
                 .padding(.bottom, 8)
             }
             
-            // Article title (centered, condensed serif font)
+            // Article title (centered, Instrument Serif font)
             Text(article.title)
-                .font(.system(size: 32, weight: .bold, design: .serif).width(.condensed))
+                .font(.articleHeading(size: 32))
                 .lineSpacing(6)
                 .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                 .multilineTextAlignment(.center)
@@ -630,7 +610,7 @@ struct ArticleDetailView: View {
                             .font(.system(size: 12, weight: .medium))
                             .foregroundColor(.secondary)
                         Text("\(readingTime) min read")
-                            .font(.system(size: 13, weight: .medium))
+                            .font(.uiGeneric(size: 13, weight: .medium))
                             .foregroundColor(.secondary)
                     }
                 }
@@ -641,7 +621,7 @@ struct ArticleDetailView: View {
                             .font(.system(size: 12, weight: .medium))
                             .foregroundColor(.secondary)
                         Text("\(Int(readingProgress * 100))% read")
-                            .font(.system(size: 13, weight: .medium))
+                            .font(.uiGeneric(size: 13, weight: .medium))
                             .foregroundColor(.secondary)
                     }
                 }
@@ -779,7 +759,7 @@ struct ArticleDetailView: View {
     // MARK: - Content View Functions
     private func headingView(text: String, level: Int) -> some View {
         Text(text)
-            .font(.system(size: headingSize(for: level), weight: .bold, design: .serif))
+            .font(.articleHeading(size: headingSize(for: level)))
             .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
             .padding(.top, level == 1 ? 32 : 24)
             .padding(.bottom, 12)
@@ -795,7 +775,7 @@ struct ArticleDetailView: View {
                             .lineSpacing(lineSpacing)
                     } else {
                         Text(text)
-                            .font(customFont)
+                            .font(articleTextFont)
                             .lineSpacing(lineSpacing)
                             .foregroundColor(colorScheme == .dark ? Color.white.opacity(0.9) : Color.black.opacity(0.9))
                     }
@@ -812,7 +792,7 @@ struct ArticleDetailView: View {
                     .lineSpacing(lineSpacing)
             } else {
                 Text(text)
-                    .font(customFont)
+                    .font(articleTextFont)
                     .lineSpacing(lineSpacing)
                     .foregroundColor(colorScheme == .dark ? Color.white.opacity(0.9) : Color.black.opacity(0.9))
             }
@@ -847,14 +827,14 @@ struct ArticleDetailView: View {
             // Add the bold part
             currentResult = currentResult + Text(boldPart)
                 .fontWeight(.bold)
-                .font(customFont)
+                .font(articleTextFont)
                 .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
             
             // Add the normal part (if it exists)
             if !normalPart.isEmpty {
                 currentResult = currentResult + Text(normalPart)
                     .fontWeight(.regular)
-                    .font(customFont)
+                    .font(articleTextFont)
                     .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
             }
             
@@ -919,7 +899,7 @@ struct ArticleDetailView: View {
             
             if let caption = caption, !caption.isEmpty {
                 Text(caption)
-                    .font(.system(size: 14, weight: .regular, design: .serif))
+                    .font(articleCaptionFont)
                     .foregroundColor(.secondary)
                     .italic()
                     .padding(.horizontal, 4)
@@ -945,7 +925,8 @@ struct ArticleDetailView: View {
             
             if let author = author, !author.isEmpty {
                 Text("— \(author)")
-                    .font(.system(size: 15, weight: .regular, design: .serif))
+                    .font(articleCaptionFont)
+                    .italic()
                     .foregroundColor(.secondary)
                     .padding(.leading, 16)
             }
@@ -958,12 +939,12 @@ struct ArticleDetailView: View {
             ForEach(Array(items.enumerated()), id: \.offset) { index, item in
                 HStack(alignment: .top, spacing: 12) {
                     Text(ordered ? "\(index + 1)." : "•")
-                        .font(.system(size: 17, weight: .regular, design: .serif))
+                        .font(articleTextFont)
                         .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                         .padding(.top, 2)
                         .frame(minWidth: ordered ? 20 : 8, alignment: .leading)
                     Text(item)
-                        .font(.system(size: 17, weight: .regular, design: .serif))
+                        .font(articleTextFont)
                         .lineSpacing(6)
                         .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                     Spacer()
@@ -979,13 +960,13 @@ struct ArticleDetailView: View {
                 Image(systemName: "logo.twitter")
                     .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                 Text("Twitter")
-                    .font(.system(size: 14, weight: .medium, design: .serif))
+                    .font(.uiGeneric(size: 14, weight: .medium))
                     .foregroundColor(.secondary)
                 Spacer()
             }
             
             Link("View Tweet", destination: url)
-                .font(.system(size: 16, weight: .medium, design: .serif))
+                .font(.uiGeneric(size: 16, weight: .medium))
                 .foregroundColor(.accentColor)
         }
         .padding(16)
@@ -998,20 +979,20 @@ struct ArticleDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             if let title = title {
                 Text(title)
-                    .font(.system(size: 16, weight: .semibold, design: .serif))
+                    .font(.uiGeneric(size: 16, weight: .semibold))
                     .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                     .lineLimit(2)
             }
             
             if let description = description {
                 Text(description)
-                    .font(.system(size: 14, weight: .regular, design: .serif))
+                    .font(.uiGeneric(size: 14, weight: .regular))
                     .foregroundColor(.secondary)
                     .lineLimit(3)
             }
             
             Link(url.host ?? url.absoluteString, destination: url)
-                .font(.system(size: 14, weight: .medium, design: .serif))
+                .font(.uiGeneric(size: 14, weight: .medium))
                 .foregroundColor(.accentColor)
         }
         .padding(16)
@@ -1026,13 +1007,13 @@ struct ArticleDetailView: View {
                 Image(systemName: "play.rectangle.fill")
                     .foregroundColor(.red)
                 Text(platformName(for: platform))
-                    .font(.system(size: 14, weight: .medium, design: .serif))
+                    .font(.uiGeneric(size: 14, weight: .medium))
                     .foregroundColor(.secondary)
                 Spacer()
             }
             
             Link("Watch Video", destination: url)
-                .font(.system(size: 16, weight: .medium, design: .serif))
+                .font(.uiGeneric(size: 16, weight: .medium))
                 .foregroundColor(.accentColor)
         }
         .padding(16)

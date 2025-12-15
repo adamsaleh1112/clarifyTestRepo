@@ -34,7 +34,7 @@ struct ContinueReadingCard: View {
                 VStack(alignment: .leading, spacing: 8) {
                     // Title
                     Text(article.title)
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.articleCardTitle(size: 16))
                         .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)

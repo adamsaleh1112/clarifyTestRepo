@@ -96,7 +96,7 @@ struct AIChatView: View {
             if !messages.isEmpty {
                 HStack {
                     Text("Clarify AI")
-                        .font(.system(size: 18, weight: .semibold))
+                        .font(.uiHeadingBold(size: 18))
                         .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                     
                     Spacer()
@@ -125,7 +125,7 @@ struct AIChatView: View {
             
             // Greeting
             Text("How can I help you today?")
-                .font(.system(size: 24, weight: .semibold))
+                .font(.uiHeadingBold(size: 24))
                 .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                 .multilineTextAlignment(.center)
             
@@ -167,7 +167,7 @@ struct AIChatView: View {
                     .frame(width: 20)
                 
                 Text(title)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.uiHeading(size: 16))
                     .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                 
                 Spacer()
@@ -242,7 +242,7 @@ struct AIChatView: View {
             HStack(spacing: 12) {
                 // Text field
                 TextField("Ask anything about this text...", text: $userInput)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.uiHeading(size: 16))
                     .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                     .textFieldStyle(PlainTextFieldStyle())
                     .tint(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
@@ -801,7 +801,7 @@ struct ChatMessageRow: View {
                 Spacer()
                 
                 Text(message.content)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.uiHeading(size: 16))
                     .foregroundColor(colorScheme == .dark ? Color.themeBackgroundDark : Color.themeBackground)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)

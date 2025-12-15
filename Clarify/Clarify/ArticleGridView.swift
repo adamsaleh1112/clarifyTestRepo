@@ -93,7 +93,7 @@ struct ArticleGridView: View {
                                         // Text overlay at bottom
                                         VStack(alignment: .leading, spacing: 4) {
                                             Text(article.title)
-                                                .font(.system(size: 14, weight: .bold, design: .default))
+                                                .font(.articleCardTitle(size: 14))
                                                 .foregroundColor(.white)
                                                 .lineLimit(2)
                                                 .multilineTextAlignment(.leading)
@@ -101,17 +101,17 @@ struct ArticleGridView: View {
                                             
                                             HStack {
                                                 Text(article.date)
-                                                    .font(.system(size: 11, weight: .medium, design: .default))
+                                                    .font(.uiGeneric(size: 11, weight: .medium))
                                                     .foregroundColor(.white.opacity(0.9))
                                                     .shadow(color: .black.opacity(0.3), radius: 1, x: 0, y: 1)
                                                 
                                                 if let readingTime = article.estimatedReadingTimeMinutes {
                                                     Text("·")
-                                                        .font(.system(size: 11, weight: .medium))
+                                                        .font(.uiGeneric(size: 11, weight: .medium))
                                                         .foregroundColor(.white.opacity(0.7))
                                                     
                                                     Text("\(readingTime) min read")
-                                                        .font(.system(size: 11, weight: .medium, design: .default))
+                                                        .font(.uiGeneric(size: 11, weight: .medium))
                                                         .foregroundColor(.white.opacity(0.9))
                                                         .shadow(color: .black.opacity(0.3), radius: 1, x: 0, y: 1)
                                                 }
@@ -256,12 +256,12 @@ struct ArticleGridView: View {
                         // Text Container with separate padding
                         VStack(alignment: .leading, spacing: 6) {
                             Text(article.title)
-                                .font(.system(size: 16, weight: .semibold, design: .default))
+                                .font(.articleCardTitle(size: 16))
                                 .lineLimit(2)
                                 .multilineTextAlignment(.leading)
                             
                             Text(article.date)
-                                .font(.system(size: 13, weight: .medium, design: .default))
+                                .font(.uiGeneric(size: 13, weight: .medium))
                                 .foregroundColor(.secondary)
                             
                             Spacer()

@@ -2,7 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @AppStorage("appearance") private var appearance: Appearance = .system
-    @AppStorage("typography") private var typography: Typography = .modern
+    // Typography selection removed - using fixed font hierarchy
     @StateObject private var userManager = FirebaseUserManager.shared
     @StateObject private var articleDataManager = ArticleDataManager()
     @Environment(\.colorScheme) var colorScheme
@@ -37,7 +37,7 @@ struct SettingsView: View {
             // Custom Header
             HStack {
                 Text("Settings")
-                    .font(.system(size: 32.3, weight: .bold, design: .default))
+                    .font(.uiHeading(size: 32.3))
                     .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                 Spacer()
             }
@@ -50,7 +50,7 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
                         Text("Appearance")
-                            .font(.system(size: 18, weight: .semibold, design: .default))
+                            .font(.uiGeneric(size: 18, weight: .semibold))
                             .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
                         Spacer()
                     }
@@ -64,7 +64,7 @@ struct SettingsView: View {
                                 }
                             }) {
                                 Text(option.rawValue.capitalized)
-                                    .font(.system(size: 14, weight: .medium, design: .default))
+                                    .font(.uiGeneric(size: 14, weight: .medium))
                                     .foregroundColor(appearance == option ? 
                                         (colorScheme == .dark ? Color.themeBlack : Color.themeWhiteDark) : 
                                         (colorScheme == .dark ? Color.themeWhiteDark.opacity(0.7) : Color.themeBlack.opacity(0.7)))
@@ -93,58 +93,11 @@ struct SettingsView: View {
                 }
                 .padding(.horizontal, 26)
                 
-                // Typography Section
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        Text("Typography")
-                            .font(.system(size: 18, weight: .semibold, design: .default))
-                            .foregroundColor(colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack)
-                        Spacer()
-                    }
-                    
-                    // Custom Segmented Control for Typography
-                    HStack(spacing: 0) {
-                        ForEach(Typography.allCases, id: \.self) { option in
-                            Button(action: {
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    typography = option
-                                }
-                            }) {
-                                Text(option.displayName)
-                                    .font(.system(size: 14, weight: .medium, design: .default))
-                                    .foregroundColor(typography == option ? 
-                                        (colorScheme == .dark ? Color.themeBlack : Color.themeWhiteDark) : 
-                                        (colorScheme == .dark ? Color.themeWhiteDark.opacity(0.7) : Color.themeBlack.opacity(0.7)))
-                                    .padding(.vertical, 10)
-                                    .padding(.horizontal, 16)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .fill(typography == option ? 
-                                                (colorScheme == .dark ? Color.themeWhiteDark : Color.themeBlack) : 
-                                                Color.clear)
-                                    )
-                            }
-                            .buttonStyle(PlainButtonStyle())
-                        }
-                    }
-                    .padding(4)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(colorScheme == .dark ? Color.themeRaisedDark : Color.themeRaised)
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(colorScheme == .dark ? Color.themeStrokeDark : Color.themeStroke, lineWidth: 0.5)
-                    )
-                    .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
-                }
-                .padding(.horizontal, 26)
-                
                 // Logout Section
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
                         Text("Account")
-                            .font(.system(size: 18, weight: .semibold, design: .default))
+                            .font(.uiGeneric(size: 18, weight: .semibold))
                             .foregroundColor(colorScheme == .dark ? Color(hex: "ECE3DF") : Color(hex: "312D2B"))
                         Spacer()
                     }
@@ -164,7 +117,7 @@ struct SettingsView: View {
                             }
                             
                             Text(isLoggingOut ? "Logging Out..." : "Log Out")
-                                .font(.system(size: 16, weight: .medium))
+                                .font(.uiGeneric(size: 16, weight: .medium))
                                 .foregroundColor(.red)
                             
                             Spacer()

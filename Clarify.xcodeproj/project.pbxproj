@@ -13,9 +13,14 @@
 		36F3A542E4412005A3B1F5D9 /* ArticleDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C796C0758BC0986BAFCE2117 /* ArticleDetailView.swift */; };
 		7D1C10E1AF7EB70E57CF879E /* Color+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE7599C10EF81C3CDB6ADFF9 /* Color+Extensions.swift */; };
 		A22F58CC2EE29ED70099DC4C /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A22F58C82EE29ED70099DC4C /* GoogleService-Info.plist */; };
+		A22F58CD2EE29ED70099DC4C /* FirebaseUserManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A22F58C92EE29ED70099DC4C /* FirebaseUserManager.swift */; };
+		A22F58CF2EE29ED70099DC4C /* CloudArticleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A22F58CE2EE29ED70099DC4C /* CloudArticleManager.swift */; };
 		A27969DE2E8F0B07004FC06D /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A27969DB2E8F0B07004FC06D /* Extensions.swift */; };
 		A27969E02E8F0B07004FC06D /* SimpleAIChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A27969DC2E8F0B07004FC06D /* SimpleAIChatView.swift */; };
 		A27C2538E47351780E86D55A /* ArticleGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B70CCC7CB280229172C80FAE /* ArticleGridView.swift */; };
+		A2B82F242EE36F0500FCCE82 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = A22F58C52EE29CED0099DC4C /* FirebaseAuth */; };
+		A2B82F252EE36F0500FCCE82 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = A22F58C62EE29CED0099DC4C /* FirebaseCore */; };
+		A2B82F262EE36F0500FCCE82 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = A22F58C72EE29CED0099DC4C /* FirebaseFirestore */; };
 		A2E02D4C2E8F27FE0078B852 /* OpenAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2E02D4B2E8F27FE0078B852 /* OpenAIService.swift */; };
 		A2E02D4E2E8F66F50078B852 /* PDFViewerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2E02D4D2E8F66F50078B852 /* PDFViewerView.swift */; };
 		A2E02D502E8F69500078B852 /* ArticleDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2E02D4F2E8F69500078B852 /* ArticleDataManager.swift */; };
@@ -36,7 +41,6 @@
 		E0E0E0E02EFFFF0000000010 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E0E0E02EFFFF0000000011 /* Typography.swift */; };
 		E0E0E0E02EFFFF0000000012 /* Font+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E0E0E02EFFFF0000000013 /* Font+Extensions.swift */; };
 		F45B1F938EC7417851B331ED /* Article.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60943A40DA07E15A37F2727C /* Article.swift */; };
-		A22F58CD2EE29ED70099DC4C /* FirebaseUserManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A22F58C92EE29ED70099DC4C /* FirebaseUserManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -45,6 +49,7 @@
 		7D1F743BA7380FB4ED1DE874 /* Clarify.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Clarify.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		97593DFC4857773EFDB8D58B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A22F58C82EE29ED70099DC4C /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		A22F58C92EE29ED70099DC4C /* FirebaseUserManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseUserManager.swift; sourceTree = "<group>"; };
 		A26264132E8EE7B3008E511D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		A27969DB2E8F0B07004FC06D /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		A27969DC2E8F0B07004FC06D /* SimpleAIChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleAIChatView.swift; sourceTree = "<group>"; };
@@ -70,7 +75,7 @@
 		E0E0E0E02EFFFF0000000009 /* OnboardingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingOverlay.swift; sourceTree = "<group>"; };
 		E0E0E0E02EFFFF0000000011 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
 		E0E0E0E02EFFFF0000000013 /* Font+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Font+Extensions.swift"; sourceTree = "<group>"; };
-		A22F58C92EE29ED70099DC4C /* FirebaseUserManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseUserManager.swift; sourceTree = "<group>"; };
+		A22F58CE2EE29ED70099DC4C /* CloudArticleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudArticleManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -78,6 +83,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A2B82F262EE36F0500FCCE82 /* FirebaseFirestore in Frameworks */,
+				A2B82F252EE36F0500FCCE82 /* FirebaseCore in Frameworks */,
+				A2B82F242EE36F0500FCCE82 /* FirebaseAuth in Frameworks */,
 				BAE30EAD17D091710F44A696 /* SwiftSoup in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -125,6 +133,7 @@
 				D2E1A6F62C9F4A8E00123456 /* ReadAloudControlPill.swift */,
 				D2E1A6FA2C9F4A8E00123456 /* LoginView.swift */,
 				A22F58C92EE29ED70099DC4C /* FirebaseUserManager.swift */,
+				A22F58CE2EE29ED70099DC4C /* CloudArticleManager.swift */,
 			);
 			path = Clarify;
 			sourceTree = "<group>";
@@ -247,6 +256,7 @@
 				D2E1A6F52C9F4A8E00123456 /* ReadAloudControlPill.swift in Sources */,
 				D2E1A6F92C9F4A8E00123456 /* LoginView.swift in Sources */,
 				A22F58CD2EE29ED70099DC4C /* FirebaseUserManager.swift in Sources */,
+				A22F58CF2EE29ED70099DC4C /* CloudArticleManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

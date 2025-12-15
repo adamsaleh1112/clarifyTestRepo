@@ -3,8 +3,12 @@ import Foundation
 class ArticleDataManager: ObservableObject {
     private let userDefaults = UserDefaults.standard
     private let articlesKey = "SavedArticles"
+    private let cloudManager = CloudArticleManager()
     
     @Published var articles: [Article] = []
+    @Published var isSyncing = false
+    @Published var lastSyncDate: Date?
+    @Published var syncError: String?
     
     init() {
         loadArticles()
@@ -15,11 +19,31 @@ class ArticleDataManager: ObservableObject {
     func addArticle(_ article: Article) {
         articles.insert(article, at: 0) // Add to beginning for newest-first order
         saveArticles()
+        
+        // Sync to Firebase in background
+        Task {
+            let result = await cloudManager.uploadArticle(article)
+            if case .failure(let error) = result {
+                await MainActor.run {
+                    syncError = "Failed to sync article: \(error.localizedDescription)"
+                }
+            }
+        }
     }
     
     func removeArticle(_ article: Article) {
         articles.removeAll { $0.id == article.id }
         saveArticles()
+        
+        // Sync deletion to Firebase in background
+        Task {
+            let result = await cloudManager.deleteArticle(article.id.uuidString)
+            if case .failure(let error) = result {
+                await MainActor.run {
+                    syncError = "Failed to delete article from cloud: \(error.localizedDescription)"
+                }
+            }
+        }
     }
     
     func updateArticle(_ article: Article) {
@@ -32,7 +56,21 @@ class ArticleDataManager: ObservableObject {
     func toggleFavorite(_ article: Article) {
         if let index = articles.firstIndex(where: { $0.id == article.id }) {
             articles[index].isFavorite.toggle()
+            let updatedArticle = articles[index]
             saveArticles()
+            
+            // Sync favorite status to Firebase in background
+            Task {
+                let result = await cloudManager.toggleArticleFavorite(
+                    updatedArticle.id.uuidString, 
+                    isFavorite: updatedArticle.isFavorite
+                )
+                if case .failure(let error) = result {
+                    await MainActor.run {
+                        syncError = "Failed to sync favorite status: \(error.localizedDescription)"
+                    }
+                }
+            }
         }
     }
     
@@ -40,7 +78,22 @@ class ArticleDataManager: ObservableObject {
         if let index = articles.firstIndex(where: { $0.id == article.id }) {
             articles[index].readingProgress = progress
             articles[index].lastReadDate = Date()
+            let updatedArticle = articles[index]
             saveArticles()
+            
+            // Sync reading progress to Firebase in background
+            Task {
+                let result = await cloudManager.updateArticleProgress(
+                    updatedArticle.id.uuidString,
+                    progress: progress,
+                    lastReadDate: updatedArticle.lastReadDate ?? Date()
+                )
+                if case .failure(let error) = result {
+                    await MainActor.run {
+                        syncError = "Failed to sync reading progress: \(error.localizedDescription)"
+                    }
+                }
+            }
         }
     }
     
@@ -100,7 +153,51 @@ class ArticleDataManager: ObservableObject {
     func clearAllArticles() {
         articles.removeAll()
         userDefaults.removeObject(forKey: articlesKey)
+        syncError = nil
+        lastSyncDate = nil
         print("🗑️ Cleared all articles")
+    }
+    
+    // MARK: - Firebase Sync Methods
+    
+    /// Sync articles with Firebase - download cloud articles and merge with local
+    @MainActor
+    func syncWithFirebase() async {
+        isSyncing = true
+        syncError = nil
+        
+        let result = await cloudManager.performFullSync(localArticles: articles)
+        
+        switch result {
+        case .success(let cloudArticles):
+            // Replace local articles with cloud articles (cloud is source of truth)
+            articles = cloudArticles
+            saveArticles()
+            lastSyncDate = Date()
+            print("✅ Firebase sync completed: \(cloudArticles.count) articles")
+            
+        case .failure(let error):
+            syncError = error.localizedDescription
+            print("❌ Firebase sync failed: \(error.localizedDescription)")
+        }
+        
+        isSyncing = false
+    }
+    
+    /// Load articles on app launch - try Firebase first, fallback to local
+    @MainActor
+    func loadArticlesWithSync() async {
+        // First load local articles immediately for UI
+        loadArticles()
+        
+        // Then sync with Firebase in background
+        await syncWithFirebase()
+    }
+    
+    /// Manual sync trigger for pull-to-refresh
+    @MainActor
+    func refreshFromCloud() async {
+        await syncWithFirebase()
     }
     
     func getArticleCount() -> Int {
