@@ -143,6 +143,13 @@ struct ContentView: View {
                     handleIncomingURL(url)
                 }
             }
+            .task {
+                // Load articles with Firebase sync on app launch
+                if !hasLoadedInitialData {
+                    hasLoadedInitialData = true
+                    await dataManager.loadArticlesWithSync()
+                }
+            }
             .alert("Processing Article", isPresented: $isProcessingSharedURL) {
                 // No buttons - just show processing
             } message: {
