@@ -81,5 +81,5 @@ The goal is simple:
 ### `$ installation`
 
 ```bash
-git clone https://github.com/adamsaleh1112/clarifyTestRepo.git
+git clone https://github.com/adamsaleh1112/clarify-ios.git
 cd clarify
